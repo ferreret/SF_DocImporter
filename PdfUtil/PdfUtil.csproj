@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>    
+    <None Update="vsconfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Vintasoft.Imaging">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Drawing.SkiaSharp">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Drawing.SkiaSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Gdi">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Gdi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Pdf">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Pdf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
