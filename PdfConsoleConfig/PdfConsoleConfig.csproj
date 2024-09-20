@@ -2,6 +2,22 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PdfUtil\PdfUtil.csproj" />
+    <Reference Include="Vintasoft.Imaging">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Drawing.SkiaSharp">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Drawing.SkiaSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Gdi">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Gdi.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Pdf">
+      <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Pdf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
 
   <PropertyGroup>
