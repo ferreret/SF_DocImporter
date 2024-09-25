@@ -23,9 +23,9 @@ namespace PdfUtil
             var documentDefinition = await LoadDocumentDefinitionAsync(jsonPath);
             if (documentDefinition == null) return null;
 
-            if (!CheckIdentifiers(pdf, documentDefinition)) return null;
+            if (!await CheckIdentifiersAsync(pdf, documentDefinition)) return null;
 
-            return ProcessFields(pdf, documentDefinition);
+            return await ProcessFieldsAsync(pdf, documentDefinition);
         }
 
         /// <summary>
@@ -55,12 +55,12 @@ namespace PdfUtil
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="documentDefinition">Definición del documento que contiene los identificadores a buscar.</param>
         /// <returns>True si se encuentran suficientes identificadores, false en caso contrario.</returns>
-        private static bool CheckIdentifiers(PdfDocument pdf, DocumentDefinition documentDefinition)
+        private static async Task<bool> CheckIdentifiersAsync(PdfDocument pdf, DocumentDefinition documentDefinition)
         {
             int identifiersFound = 0;
             foreach (var identifier in documentDefinition.Identifiers!)
             {
-                if (TryFindTextInRectangle(pdf, identifier))
+                if (await TryFindTextInRectangleAsync(pdf, identifier))
                     identifiersFound++;
             }
 
@@ -80,9 +80,9 @@ namespace PdfUtil
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="identifier">Identificador que contiene las coordenadas y la expresión a buscar.</param>
         /// <returns>True si el texto es encontrado, false en caso contrario.</returns>
-        private static bool TryFindTextInRectangle(PdfDocument pdf, SearchRectangle identifier)
+        private static async Task<bool> TryFindTextInRectangleAsync(PdfDocument pdf, SearchRectangle identifier)
         {
-            var region = VSUtil.FindTextInRectangle(pdf, 0, identifier);
+            var region = await VSUtil.FindTextInRectangleAsync(pdf, 0, identifier);
             if (region == null)
             {
                 Console.WriteLine($"No se encontró el identificador: {identifier.Expression}");
@@ -101,13 +101,13 @@ namespace PdfUtil
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="documentDefinition">Definición del documento con los campos a buscar.</param>
         /// <returns>Una instancia de Factura con los campos encontrados.</returns>
-        private static Factura ProcessFields(PdfDocument pdf, DocumentDefinition documentDefinition)
+        private static async Task<Factura> ProcessFieldsAsync(PdfDocument pdf, DocumentDefinition documentDefinition)
         {
             var factura = new Factura();
 
             foreach (var field in documentDefinition.Fields!)
             {
-                var region = VSUtil.FindRegexInRectangle(pdf, 0, field);
+                var region = await VSUtil.FindRegexInRectangleAsync(pdf, 0, field);
                 if (region == null)
                 {
                     Console.WriteLine($"No se encontró el campo: {field.Expression}");
@@ -201,7 +201,7 @@ namespace PdfUtil
         {
             foreach (var element in elements)
             {
-                var region = VSUtil.FindTextOnPdfPage(pdfDocument, 0, element.Value);
+                var region = VSUtil.FindTextOnPdfPageAsync(pdfDocument, 0, element.Value).Result;
                 if (region != null)
                 {
                     targetList.Add(CreateSearchRectangle(element.Key, element.Value, region));
