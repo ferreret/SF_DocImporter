@@ -2,6 +2,7 @@ using PdfProcessingService;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
 using System.Runtime.Versioning;
+using PdfProcessingService.Processors;
 
 [assembly: SupportedOSPlatform("windows")]
 
@@ -18,6 +19,8 @@ builder.Services.AddWindowsService(
 
 LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(builder.Services);
 
+builder.Services.AddSingleton<MetaDataExtractor>();
+builder.Services.AddSingleton<WindreamImporter>();
 builder.Services.AddHostedService<Worker>();
 
 

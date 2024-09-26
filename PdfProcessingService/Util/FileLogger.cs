@@ -27,10 +27,9 @@ namespace PdfProcessingService.Util
         }
 
         private string GetLogFilePath()
-        {
-            string? directory = Path.GetDirectoryName(_logFilePath);
+        {            
             string fileName = $"{DateTime.Now:yyyyMMdd}.log";
-            return Path.Combine(directory!, fileName);
+            return Path.Combine(_logFilePath, fileName);
         }
 
         private void Log(string message, FileLogLevel level)

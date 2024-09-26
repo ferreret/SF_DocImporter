@@ -9,6 +9,8 @@ namespace PdfProcessingService.Util
         public int FoldersCount { get; set; }
         public List<string>? Folders { get; set; }
         public string? LogFolder { get; set; }
+        public int DelaySeconds { get; set; }
+
 
         public ServiceConfig(string path)
         {
@@ -19,7 +21,6 @@ namespace PdfProcessingService.Util
             {
                 throw new FormatException("El valor 'Count' en la sección 'ImportFolders' no es un entero válido.");
             }
-
             FoldersCount = folderCount;
 
             // Inicializar la lista de carpetas
@@ -46,6 +47,13 @@ namespace PdfProcessingService.Util
             {
                 throw new DirectoryNotFoundException($"La carpeta de logs especificada no existe: {LogFolder}");
             }
+
+            // Validamos que los segundos de espera sean un entero válido
+            if (!int.TryParse(iniFile.ReadValue("Service", "DelaySeconds"), out int delaySeconds))
+            {
+                throw new FormatException("El valor 'DelaySeconds' no es un entero válido.");
+            }
+            DelaySeconds = delaySeconds;
         }
     }
 }
