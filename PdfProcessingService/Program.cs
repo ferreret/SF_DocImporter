@@ -1,0 +1,25 @@
+using PdfProcessingService;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
+using System.Runtime.Versioning;
+
+[assembly: SupportedOSPlatform("windows")]
+
+
+var builder = Host.CreateApplicationBuilder(args);
+
+
+builder.Services.AddWindowsService(
+    options =>
+    {
+        options.ServiceName = "PdfProcessingService";
+    }
+);
+
+LoggerProviderOptions.RegisterProviderOptions<EventLogSettings, EventLogLoggerProvider>(builder.Services);
+
+builder.Services.AddHostedService<Worker>();
+
+
+var host = builder.Build();
+host.Run();
