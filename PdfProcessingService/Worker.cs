@@ -81,12 +81,22 @@ namespace PdfProcessingService
 
                                 _fileLogger.LogInformation($"Procesando archivo PDF: {file}");
 
+                                try
+                                {
+                                    var metadata = _extractor.Extract(file, _fileLogger);
+                                    _fileLogger.LogInformation(metadata.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    _fileLogger.LogError($"Error al procesar el archivo {file}: {ex.Message}");
+                                }
+
                                 // Extraer metadatos del archivo
-                                var metadata = _extractor.Extract(file); 
+                                //var metadata = _extractor.Extract(file); 
 
                                 // Importar el archivo a Windream
-                                _importer.Import(file, metadata);
-                                
+                                //_importer.Import(file, metadata);
+
 
                                 _fileLogger.LogInformation($"Archivo procesado: {file}");
                             }
