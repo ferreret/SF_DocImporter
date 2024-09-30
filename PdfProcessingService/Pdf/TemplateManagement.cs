@@ -1,10 +1,9 @@
 ﻿using PdfProcessingService.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Vintasoft.Imaging.Pdf;
 using Vintasoft.Imaging.Text;
 
@@ -20,28 +19,31 @@ namespace PdfProcessingService.Pdf
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="jsonPath">Ruta del archivo JSON que contiene la definición del documento.</param>
         /// <returns>Una instancia de Factura o null si no se encuentran suficientes identificadores.</returns>
-        public static async Task<Factura?> ApplyFacturaTemplateAsync(string pathPdf, string jsonPath)
+        public static Factura? ApplyFacturaTemplate(string pathPdf, string jsonPath)
         {
             using var pdf = new PdfDocument(pathPdf);
-            var documentDefinition = await LoadDocumentDefinitionAsync(jsonPath);
+            var documentDefinition = LoadDocumentDefinition(jsonPath);
             if (documentDefinition == null) return null;
 
-            if (!await CheckIdentifiersAsync(pdf, documentDefinition)) return null;
+            if (!CheckIdentifiers(pdf, documentDefinition))
+            {
+                return null;
+            }
 
-            return await ProcessFieldsAsync(pdf, documentDefinition);
+            return ProcessFields(pdf, documentDefinition);
         }
 
         /// <summary>
-        /// Carga asíncronamente la definición del documento desde un archivo JSON.
+        /// Carga la definición del documento desde un archivo JSON.
         /// NBL - 20/09/2024
         /// </summary>
         /// <param name="jsonPath">Ruta del archivo JSON.</param>
         /// <returns>Una instancia de DocumentDefinition o null en caso de error.</returns>
-        private static async Task<DocumentDefinition?> LoadDocumentDefinitionAsync(string jsonPath)
+        private static DocumentDefinition? LoadDocumentDefinition(string jsonPath)
         {
             try
             {
-                string json = await File.ReadAllTextAsync(jsonPath);
+                string json = File.ReadAllText(jsonPath);
                 return JsonSerializer.Deserialize<DocumentDefinition>(json);
             }
             catch (Exception ex)
@@ -58,12 +60,12 @@ namespace PdfProcessingService.Pdf
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="documentDefinition">Definición del documento que contiene los identificadores a buscar.</param>
         /// <returns>True si se encuentran suficientes identificadores, false en caso contrario.</returns>
-        private static async Task<bool> CheckIdentifiersAsync(PdfDocument pdf, DocumentDefinition documentDefinition)
+        private static bool CheckIdentifiers(PdfDocument pdf, DocumentDefinition documentDefinition)
         {
             int identifiersFound = 0;
             foreach (var identifier in documentDefinition.Identifiers!)
             {
-                if (await TryFindTextInRectangleAsync(pdf, identifier))
+                if (TryFindTextInRectangle(pdf, identifier))
                     identifiersFound++;
             }
 
@@ -83,9 +85,9 @@ namespace PdfProcessingService.Pdf
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="identifier">Identificador que contiene las coordenadas y la expresión a buscar.</param>
         /// <returns>True si el texto es encontrado, false en caso contrario.</returns>
-        private static async Task<bool> TryFindTextInRectangleAsync(PdfDocument pdf, SearchRectangle identifier)
+        private static bool TryFindTextInRectangle(PdfDocument pdf, SearchRectangle identifier)
         {
-            var region = await VSUtil.FindTextInRectangleAsync(pdf, 0, identifier);
+            var region = VSUtil.FindTextInRectangle(pdf, 0, identifier);
             if (region == null)
             {
                 Console.WriteLine($"No se encontró el identificador: {identifier.Expression}");
@@ -104,13 +106,13 @@ namespace PdfProcessingService.Pdf
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="documentDefinition">Definición del documento con los campos a buscar.</param>
         /// <returns>Una instancia de Factura con los campos encontrados.</returns>
-        private static async Task<Factura> ProcessFieldsAsync(PdfDocument pdf, DocumentDefinition documentDefinition)
+        private static Factura ProcessFields(PdfDocument pdf, DocumentDefinition documentDefinition)
         {
             var factura = new Factura();
 
             foreach (var field in documentDefinition.Fields!)
             {
-                var region = await VSUtil.FindRegexInRectangleAsync(pdf, 0, field);
+                var region = VSUtil.FindRegexInRectangle(pdf, 0, field);
                 if (region == null)
                 {
                     Console.WriteLine($"No se encontró el campo: {field.Expression}");
@@ -169,27 +171,24 @@ namespace PdfProcessingService.Pdf
         /// NBL - 20/09/2024
         /// </summary>
         /// <param name="pdfPath">Ruta del archivo PDF a procesar.</param>
-        public static async Task CreateFacturaTemplateAsync(string pdfPath)
+        public static void CreateFacturaTemplate(string pdfPath)
         {
-            await Task.Run(() =>
+            var identifiers = CreateIdentifiers();
+            var fields = CreateFields();
+            var documentDefinition = new DocumentDefinition
             {
-                var identifiers = CreateIdentifiers();
-                var fields = CreateFields();
-                var documentDefinition = new DocumentDefinition
-                {
-                    Name = "Factura",
-                    MinIdentifiers = 1,
-                    Identifiers = new List<SearchRectangle>(),
-                    Fields = new List<SearchRectangle>()
-                };
+                Name = "Factura",
+                MinIdentifiers = 1,
+                Identifiers = new List<SearchRectangle>(),
+                Fields = new List<SearchRectangle>()
+            };
 
-                using var pdfDocument = new PdfDocument(pdfPath);
+            using var pdfDocument = new PdfDocument(pdfPath);
 
-                ProcessElements(pdfDocument, identifiers, documentDefinition.Identifiers, "identificador");
-                ProcessElements(pdfDocument, fields, documentDefinition.Fields, "campo");
+            ProcessElements(pdfDocument, identifiers, documentDefinition.Identifiers, "identificador");
+            ProcessElements(pdfDocument, fields, documentDefinition.Fields, "campo");
 
-                SaveDocumentDefinition(pdfPath, documentDefinition);
-            });
+            SaveDocumentDefinition(pdfPath, documentDefinition);
         }
 
         /// <summary>
@@ -204,7 +203,7 @@ namespace PdfProcessingService.Pdf
         {
             foreach (var element in elements)
             {
-                var region = VSUtil.FindTextOnPdfPageAsync(pdfDocument, 0, element.Value).Result;
+                var region = VSUtil.FindTextOnPdfPage(pdfDocument, 0, element.Value);
                 if (region != null)
                 {
                     targetList.Add(CreateSearchRectangle(element.Key, element.Value, region));

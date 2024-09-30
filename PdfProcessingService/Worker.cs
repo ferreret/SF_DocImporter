@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using PdfProcessingService.Processors;
+using PdfProcessingService.Models;
 
 namespace PdfProcessingService
 {
@@ -65,7 +66,7 @@ namespace PdfProcessingService
                         }
 
                         // Por cada una de las carpetas de entrada, hacemos un bucle por los archivos pdf
-                        foreach (var inputFolder in config.Folders!)
+                        foreach (var (inputFolder, outputFolder) in config.Folders!)
                         {
                             _fileLogger.LogInformation($"Procesando archivos en la carpeta: {inputFolder}");
 
@@ -81,24 +82,52 @@ namespace PdfProcessingService
 
                                 _fileLogger.LogInformation($"Procesando archivo PDF: {file}");
 
+                                WindreamIndexes metadata;
+
                                 try
                                 {
-                                    var metadata = _extractor.Extract(file, _fileLogger);
+                                    metadata = _extractor.Extract(file, _fileLogger);
                                     _fileLogger.LogInformation(metadata.ToString());
                                 }
                                 catch (Exception ex)
                                 {
-                                    _fileLogger.LogError($"Error al procesar el archivo {file}: {ex.Message}");
+                                    _fileLogger.LogError($"Error al extraer metadata del archivo {file}: {ex.Message}");
+                                    continue;
                                 }
 
-                                // Extraer metadatos del archivo
-                                //var metadata = _extractor.Extract(file); 
+                                bool fileImported = false;
 
                                 // Importar el archivo a Windream
-                                //_importer.Import(file, metadata);
+                                if (metadata != null)
+                                {
+                                    try
+                                    {
+                                        fileImported = _importer.Import(file, metadata, _fileLogger, config);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _fileLogger.LogError($"Error al importar el archivo {file} a Windream: {ex.Message}");
+                                        continue;
+                                    }
 
+                                }
 
-                                _fileLogger.LogInformation($"Archivo procesado: {file}");
+                                // Mover el archivo a la carpeta de archivos procesados
+                                // Creo una carpeta por año y añado al nombre del archivo la fecha hora de procesado
+                                if (fileImported)
+                                {
+                                    string processedFolder = Path.Combine(outputFolder, DateTime.Now.Year.ToString());
+                                    Directory.CreateDirectory(processedFolder);
+
+                                    string processedFile = Path.Combine(processedFolder, $"{Path.GetFileNameWithoutExtension(file)}_{DateTime.Now:yyyyMMddHHmmss}.pdf");
+                                    File.Move(file, processedFile);
+
+                                    _fileLogger.LogInformation($"Archivo procesado: {file}");
+                                }
+                                else
+                                {
+                                    _fileLogger.LogError($"Error al importar el archivo {file} a Windream. No se ha movido a la carpeta de archivos procesados.");
+                                }
                             }
                         }
 

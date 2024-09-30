@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PdfUtil\PdfUtil.csproj" />
     <Reference Include="Vintasoft.Imaging">
       <HintPath>C:\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.dll</HintPath>

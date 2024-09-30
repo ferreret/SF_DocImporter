@@ -1,72 +1,72 @@
 {
-  "Name": "Factura",
-  "MinIdentifiers": 1,
-  "Identifiers": [
-    {
-      "Name": "Factura",
-      "Top": 702,
-      "Left": 288,
-      "Width": 70,
-      "Height": 20,
-      "Expression": "FACTURA"
-    }
-  ],
-  "Fields": [
-    {
-      "Name": "NoAutorizacion",
-      "Top": 561,
-      "Left": 145,
-      "Width": 47,
-      "Height": 15,
-      "Expression": "^B\\d{7}$"
-    },
-    {
-      "Name": "Mutua",
-      "Top": 649,
-      "Left": 338,
-      "Width": 400,
-      "Height": 30,
-      "Expression": "[A-Z¡…Õ”⁄—\\s]+"
-    },
-    {
-      "Name": "NombrePaciente",
-      "Top": 652,
-      "Left": 145,
-      "Width": 150,
-      "Height": 15,
-      "Expression": "[A-Z¡…Õ”⁄—\\s]+"
-    },
-    {
-      "Name": "DNIPaciente",
-      "Top": 621,
-      "Left": 145,
-      "Width": 52,
-      "Height": 15,
-      "Expression": ".*"
-    },
-    {
-      "Name": "FechaFactura",
-      "Top": 495,
-      "Left": 51,
-      "Width": 46,
-      "Height": 15,
-      "Expression": "([1-9]|[12][0-9]|3[01])\/(1[0-2]|[1-9])\/(19|20)\\d{2}"
-    },
-    {
-      "Name": "NoFactura",
-      "Top": 495,
-      "Left": 127,
-      "Width": 73,
-      "Height": 15,
-      "Expression": "MSF\\d{9}"
-    },
-    {
-      "Name": "CIFMutua",
-      "Top": 561,
-      "Left": 338,
-      "Width": 53,
-      "Height": 15,
-      "Expression": "[A-Z]\\d{8}"
-    }
-  ]
+    "Name": "Factura",
+    "MinIdentifiers": 1,
+    "Identifiers": [
+        {
+            "Name": "Factura",
+            "Top": 702,
+            "Left": 288,
+            "Width": 70,
+            "Height": 20,
+            "Expression": "FACTURA"
+        }
+    ],
+    "Fields": [
+        {
+            "Name": "NoAutorizacion",
+            "Top": 561,
+            "Left": 145,
+            "Width": 47,
+            "Height": 15,
+            "Expression": "^B\\d{7}$"
+        },
+        {
+            "Name": "Mutua",
+            "Top": 649,
+            "Left": 338,
+            "Width": 400,
+            "Height": 30,
+            "Expression": "[A-Z√Å√â√ç√ì√ö√ë\\s]+"
+        },
+        {
+            "Name": "NombrePaciente",
+            "Top": 652,
+            "Left": 145,
+            "Width": 150,
+            "Height": 15,
+            "Expression": "[A-Z√Å√â√ç√ì√ö√ë\\s]+"
+        },
+        {
+            "Name": "DNIPaciente",
+            "Top": 621,
+            "Left": 145,
+            "Width": 52,
+            "Height": 15,
+            "Expression": ".*"
+        },
+        {
+            "Name": "FechaFactura",
+            "Top": 495,
+            "Left": 51,
+            "Width": 46,
+            "Height": 15,
+            "Expression": "([1-9]|[12][0-9]|3[01])\/(1[0-2]|[1-9])\/(19|20)\\d{2}"
+        },
+        {
+            "Name": "NoFactura",
+            "Top": 495,
+            "Left": 127,
+            "Width": 73,
+            "Height": 15,
+            "Expression": "MSF\\d{9}"
+        },
+        {
+            "Name": "CIFMutua",
+            "Top": 561,
+            "Left": 338,
+            "Width": 53,
+            "Height": 15,
+            "Expression": "[A-Z]\\d{8}"
+        }
+    ]
 }

@@ -17,12 +17,19 @@ namespace PdfProcessingService.Models
         public string? NoFactura { get; set; }
         public string? Remesa { get; set; }
         public string? CoberturaInforme { get; set; }
-        public string? TipoDoc { get; set; }
+        public TipoDocumento? TipoDoc { get; set; }
 
         // Override ToString method to return a string representation of the object
         public override string ToString()
         {
             return $"NoAutorizacion: {NoAutorizacion}, Cobertura: {Cobertura}, NIFMutua: {NIFMutua}, NombrePaciente: {NombrePaciente}, DNIPaciente: {DNIPaciente}, FechaFactura: {FechaFactura}, NoFactura: {NoFactura}, Remesa: {Remesa}, CoberturaInforme: {CoberturaInforme}, TipoDoc: {TipoDoc}";
         }
+    }
+
+    public enum TipoDocumento
+    {
+        Autorización,
+        Factura,
+        Informe
     }
 }

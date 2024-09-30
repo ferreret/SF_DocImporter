@@ -7,9 +7,11 @@ namespace PdfProcessingService.Util
     public class ServiceConfig
     {
         public int FoldersCount { get; set; }
-        public List<string>? Folders { get; set; }
+        public List<(string path1, string path2)>? Folders { get; set; }
         public string? LogFolder { get; set; }
         public int DelaySeconds { get; set; }
+        public string? WindreamPath { get; set; }
+        public string? ObjectType { get; set; }
 
 
         public ServiceConfig(string path)
@@ -24,19 +26,26 @@ namespace PdfProcessingService.Util
             FoldersCount = folderCount;
 
             // Inicializar la lista de carpetas
-            Folders = new List<string>();
+            Folders = new List<(string path1, string path2)>(); // Cambio de tipo de lista
 
             for (int i = 1; i <= FoldersCount; i++)
             {
-                string folderPath = iniFile.ReadValue("ImportFolders", $"Folder{i}");
+                string folderPath1 = iniFile.ReadValue("ImportFolders", $"Folder{i}");
 
                 // Validar que cada carpeta exista
-                if (!Directory.Exists(folderPath))
+                if (!Directory.Exists(folderPath1))
                 {
-                    throw new DirectoryNotFoundException($"La carpeta especificada no existe: {folderPath}");
+                    throw new DirectoryNotFoundException($"La carpeta especificada no existe: {folderPath1}");
                 }
 
-                Folders.Add(folderPath);
+                string folderPath2 = iniFile.ReadValue("ImportFolders", $"FolderProcessed{i}");
+
+                if (!Directory.Exists(folderPath2))
+                {
+                    throw new DirectoryNotFoundException($"La carpeta especificada no existe: {folderPath2}");
+                }
+
+                Folders.Add((folderPath1, folderPath2));
             }
 
             // Obtener la ruta de la carpeta de logs
@@ -54,6 +63,10 @@ namespace PdfProcessingService.Util
                 throw new FormatException("El valor 'DelaySeconds' no es un entero válido.");
             }
             DelaySeconds = delaySeconds;
+
+            WindreamPath = iniFile.ReadValue("Windream", "Path");
+            ObjectType = iniFile.ReadValue("Windream", "ObjectType");
+
         }
     }
 }

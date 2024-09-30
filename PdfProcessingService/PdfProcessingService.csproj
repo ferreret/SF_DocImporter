@@ -58,14 +58,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Vintasoft.Imaging">
       <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.dll</HintPath>
     </Reference>
-    <Reference Include="Vintasoft.Imaging.Gdi">
-      <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Gdi.dll</HintPath>
+    <Reference Include="Vintasoft.Imaging.Drawing.SkiaSharp">
+      <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Drawing.SkiaSharp.dll</HintPath>
     </Reference>
     <Reference Include="Vintasoft.Imaging.Pdf">
       <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET v12.5\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Pdf.dll</HintPath>
@@ -76,9 +77,5 @@
     <None Update="PdfProcessingService.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Templates\" />
   </ItemGroup>
 </Project>
