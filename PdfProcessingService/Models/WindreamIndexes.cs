@@ -13,7 +13,7 @@ namespace PdfProcessingService.Models
         public string? NIFMutua { get; set; }
         public string? NombrePaciente { get; set; }
         public string? DNIPaciente { get; set; }
-        public DateTime FechaFactura { get; set; }
+        public DateTime? FechaFactura { get; set; }
         public string? NoFactura { get; set; }
         public string? Remesa { get; set; }
         public string? CoberturaInforme { get; set; }

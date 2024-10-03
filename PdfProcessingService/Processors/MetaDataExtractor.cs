@@ -105,6 +105,7 @@ namespace PdfProcessingService.Processors
                         _fileLogger.LogError("Error al parsear la fecha de la factura.");
                     }
                 }   
+
             }
         }
 
@@ -119,7 +120,7 @@ namespace PdfProcessingService.Processors
             // Si los valores no son nulos, los mapeamos a los índices de Windream
             windreamIndexes.NombrePaciente = nombre is null ? String.Empty : nombre.RemoveCarriageReturns();
             windreamIndexes.DNIPaciente = nif is null ? String.Empty : nif.RemoveCarriageReturns();
-            windreamIndexes.Cobertura = cobertura is null ? String.Empty : cobertura.RemoveCarriageReturns();
+            windreamIndexes.CoberturaInforme = cobertura is null ? String.Empty : cobertura.RemoveCarriageReturns();
             windreamIndexes.NoAutorizacion = autorizacion is null ? String.Empty : autorizacion.RemoveCarriageReturns();
             windreamIndexes.TipoDoc = TipoDocumento.Informe;
         }

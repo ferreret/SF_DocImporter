@@ -19,7 +19,7 @@ namespace PdfProcessingService.Util
                 return input;
 
             // Remueve los caracteres de retorno de carro (\r) y de nueva línea (\n)
-            return input.Replace("\r", "").Replace("\n", "");
+            return input.Replace("\r", "").Replace("\n", " ");
         }
     }
 }

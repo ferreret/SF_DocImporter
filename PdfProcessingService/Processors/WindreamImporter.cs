@@ -1,6 +1,7 @@
 ﻿using PdfProcessingService.Models;
 using PdfProcessingService.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,9 +11,17 @@ using WINDREAMLib;
 using WMCNNCTDLLLib;
 using WMOBRWSLib;
 using WMOMISCDLLLib;
+using WMOTOOLLib;
 
 namespace PdfProcessingService.Processors
 {
+
+    public enum OperadorBusqueda
+    {
+        Igual,
+        Diferente
+    }
+
     public sealed class WindreamImporter
     {
         // Declaramos las variables de módulo para la funcionalidad de Windream
@@ -69,49 +78,58 @@ namespace PdfProcessingService.Processors
                     _fileLogger.LogError("No se ha especificado el número de autorización.");
                     return false;
                 }
-                return importAutorizacion(pathPdf, windreamIndexes);
+                return importNoFactura(pathPdf, windreamIndexes, oObjectType);
             }
             else if (windreamIndexes.TipoDoc == TipoDocumento.Factura)
             {
                 // Si no tenemos el número de factura, no podemos trabajar con el documento
-                if (String.IsNullOrEmpty(windreamIndexes.NoFactura))
+                if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || string.IsNullOrEmpty(windreamIndexes.NoAutorizacion) || !ValidateMutua(windreamIndexes.Cobertura))
                 {
-                    _fileLogger.LogError("No se ha especificado el número de factura.");
+                    _fileLogger.LogError("Faltan datos claves en la Factura. Factura/Autorización/");
                     return false;
                 }
                 return importFactura(pathPdf, windreamIndexes, oObjectType);
             }
             else if (windreamIndexes.TipoDoc == TipoDocumento.Informe)
             {
-
-
+                // Si no tenemos el número de autorización, no podemos trabajar con el documento
+                if (String.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+                {
+                    _fileLogger.LogError("No se ha especificado el número de autorización.");
+                    return false;
+                }
+                return importNoFactura(pathPdf, windreamIndexes, oObjectType, true);
             }
             else
             {
                 _fileLogger.LogError("Tipo de documento no soportado.");
                 return false;
             }
-            return true;
-
-        }
-        // -------------------------------------------------------------------------------------------------------
-        private bool importFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType)
-        {
-            // Buscamos si ya existe una factura con el mismo número de factura
-            WMSearch wmSearch = _wmSession!.CreateWMSearch(WMEntity.WMEntityDocument);
-            // Restringimos por el tipo de documento
-            wmSearch.aWMObjectType = objectType;
-            wmSearch.AddSearchTerm("NoFactura", windreamIndexes.NoFactura, WMSearchOperator.WMSearchOperatorEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
-            wmSearch.AddSearchTerm("TipoDoc", windreamIndexes.TipoDoc.ToString(), WMSearchOperator.WMSearchOperatorEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
-            // Ejecutamos la búsqueda
-
-            return true;
+            
         }
 
         // -------------------------------------------------------------------------------------------------------
-        private bool importAutorizacion(string pathPdf, WindreamIndexes windreamIndexes)
+        private bool ValidateMutua(string? cobertura)
         {
-            return true;
+            if (string.IsNullOrEmpty(cobertura))
+            {
+                return false;
+            }
+
+            var result = Util.Common.FindUniqueMinLevenshtein("mutuas.txt", cobertura);
+
+            if (result.Item1 != null)
+            {
+                Console.WriteLine($"The unique value with the minimum Levenshtein distance is: {result.Item1} with a distance of {result.Item2}");
+                _fileLogger.LogInformation($"The unique value with the minimum Levenshtein distance is: {result.Item1} with a distance of {result.Item2}");
+                return _serviceConfig.MaxLevensthein >= result.Item2;
+            }
+            else
+            {
+                Console.WriteLine("The minimum Levenshtein distance is not unique.");
+                _fileLogger.LogError("The minimum Levenshtein distance is not unique.");
+                return false;
+            }
         }
 
         // -------------------------------------------------------------------------------------------------------
@@ -138,6 +156,535 @@ namespace PdfProcessingService.Processors
 
             return null;
         }
+
+
+        // -------------------------------------------------------------------------------------------------------
+        private bool importFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType)
+        {
+            var searchTerms = BuildSearchTermsFactura(windreamIndexes);
+            var listaDocumentos = BuscarDocumentos(objectType, searchTerms);
+
+            WMObject document;
+            IWMSession2? wmSession2 = _wmSession as IWMSession2;
+
+            if (wmSession2 == null)
+            {
+                _fileLogger.LogError("No se pudo obtener la sesión de Windream.");
+                return false;
+            }
+
+            // Desactivar el evento de indexación
+            wmSession2.SwitchEvents((int)WMCOMEvent.WMCOMEventWMSessionNeedIndex, false);
+
+            bool isNewDocument = false;
+
+            if (IsNewDocument(listaDocumentos))
+            {
+                document = CreateNewDocument(wmSession2, windreamIndexes);
+                isNewDocument = true;
+            }
+            else
+            {
+                document = CreateNewVersion(listaDocumentos);
+                isNewDocument = false;
+            }
+
+            if (!PrepareDocumentForEditing(document))
+            {
+                return false;
+            }
+
+            bool uploadFactura = UploadPdfToWindream(pathPdf, windreamIndexes, objectType, document, isNewDocument);
+
+            if (!uploadFactura)
+            {
+                return false;
+            }
+
+            UpdateDocsNoFactura(windreamIndexes, objectType);
+
+            return true;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private void UpdateDocsNoFactura(WindreamIndexes windreamIndexes, WMObject objectType)
+        {
+            // Recuperamos los documentos que no son Factura con el mismo número de autorización
+            var searchTermsNoFactura = BuildSearchTermsDiferenteFactura(windreamIndexes);
+            var listaDocumentosNoFactura = BuscarDocumentos(objectType, searchTermsNoFactura);
+
+            if (listaDocumentosNoFactura.Count > 0)
+            {
+                foreach (int docId in listaDocumentosNoFactura)
+                {
+                    WMObject docNoFactura;
+                    try
+                    {
+                        docNoFactura = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, docId);
+                        if (!PrepareDocumentForEditing(docNoFactura))
+                        {
+                            _fileLogger.LogError($"No se pudo editar el documento en Windream. {docNoFactura.aName}");
+                        }
+                        else
+                        {
+                            _fileLogger.LogInformation($"Se actualiza el documento {docNoFactura.aName}");
+                            UpdateDocumentIndexesNoFactura(docNoFactura, windreamIndexes);
+                            docNoFactura.Save();
+                            docNoFactura.unlock();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _fileLogger.LogError($"Documento no válido.");
+                    }
+                }
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private void UpdateDocumentIndexesNoFactura(WMObject document, WindreamIndexes windreamIndexes)
+        {
+            
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NoFactura))
+            {
+                document.SetVariableValue("NoFactura", windreamIndexes.NoFactura);
+                document.AddHistory($"NoFactura: {windreamIndexes.NoFactura}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.Cobertura))
+            {
+                document.SetVariableValue("Cobertura", windreamIndexes.Cobertura);
+                document.AddHistory($"Cobertura: {windreamIndexes.Cobertura}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NIFMutua))
+            {
+                document.SetVariableValue("NIFMutua", windreamIndexes.NIFMutua);
+                document.AddHistory($"NIFMutua: {windreamIndexes.NIFMutua}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NombrePaciente))
+            {
+                document.SetVariableValue("NombrePaciente", windreamIndexes.NombrePaciente);
+                document.AddHistory($"NombrePaciente: {windreamIndexes.NombrePaciente}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.DNIPaciente))
+            {
+                document.SetVariableValue("DNIPaciente", windreamIndexes.DNIPaciente);
+                document.AddHistory($"DNIPaciente: {windreamIndexes.DNIPaciente}");
+            }
+
+            if (windreamIndexes.FechaFactura.HasValue)
+            {
+                document.SetVariableValue("FechaFactura", windreamIndexes.FechaFactura);
+                document.AddHistory($"FechaFactura: {windreamIndexes.FechaFactura}");
+            }
+
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private List<(string campo, string valor, OperadorBusqueda operador)> BuildSearchTermsFactura(WindreamIndexes windreamIndexes)
+        {
+            return new List<(string campo, string valor, OperadorBusqueda operador)>
+            {
+                ("NoFactura", windreamIndexes.NoFactura!, OperadorBusqueda.Igual),
+                ("TipoDoc", windreamIndexes.TipoDoc.ToString()!, OperadorBusqueda.Igual)
+            };
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private List<(string campo, string valor, OperadorBusqueda operador)> BuildSearchTermsAut(WindreamIndexes windreamIndexes)
+        {
+            return new List<(string campo, string valor, OperadorBusqueda operador)>
+            {
+                ("NoAutorizacion", windreamIndexes.NoAutorizacion!, OperadorBusqueda.Igual),
+                ("TipoDoc", windreamIndexes.TipoDoc.ToString()!, OperadorBusqueda.Igual)
+            };
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private List<(string campo, string valor, OperadorBusqueda operador)> BuildSearchTermsDiferenteFactura(WindreamIndexes windreamIndexes)
+        {
+            return new List<(string campo, string valor, OperadorBusqueda operador)>
+            {
+                ("NoAutorizacion", windreamIndexes.NoAutorizacion!, OperadorBusqueda.Igual),
+                ("TipoDoc", "Factura", OperadorBusqueda.Diferente)
+            };
+        }
+
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private bool IsNewDocument(ArrayList listaDocumentos)
+        {
+            return listaDocumentos == null || listaDocumentos.Count == 0;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private WMObject CreateNewDocument(IWMSession2 wmSession2, WindreamIndexes windreamIndexes)
+        {
+            _fileLogger.LogInformation("No se encontró la factura en Windream, se procede a crearla.");
+
+            string targetFolder = CreateWindreamSubfolders();
+
+            string matchingFileName;
+            if (windreamIndexes.TipoDoc == TipoDocumento.Factura)
+                matchingFileName = windreamIndexes.NoAutorizacion! + "F.pdf";
+            else if (windreamIndexes.TipoDoc == TipoDocumento.Autorización)
+                matchingFileName = windreamIndexes.NoAutorizacion! + "A.pdf";
+            else
+                matchingFileName = windreamIndexes.NoAutorizacion! + "-" + Common.GenerateUniqueIdentifier() + "-" +  "I.pdf";
+            
+            // string matchingFileName = windreamIndexes.NoAutorizacion! + "F.pdf";
+            string documentPath = Path.Combine(targetFolder, matchingFileName);
+
+            return wmSession2.GetNewWMObjectFS(WMEntity.WMEntityDocument, documentPath, 0);
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private WMObject CreateNewVersion(ArrayList listaDocumentos)
+        {
+            _fileLogger.LogInformation("Se encontró la factura en Windream, se procede a crear una nueva versión.");
+
+            WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, (int)listaDocumentos[0]!);
+            document.LockFor((int)WMObjectEditMode.WMObjectEditModeMakeVersion);
+            document.CreateVersion();
+            document.Save();
+            document.unlock();
+
+            return document;
+        }
+
+
+        // -------------------------------------------------------------------------------------------------------
+        // FUNCTION: CreateDirectory
+        // Función que crea un directorio en Windream
+        // NBL 2024/04/17
+        // -------------------------------------------------------------------------------------------------------
+        public bool CreateDirectory(string directoryPath)
+        {
+            if (_wmSession == null)
+            {
+                throw new InvalidOperationException("La sesión de Windream no está inicializada.");
+            }
+
+            WMObject oWMObject;
+            try
+            {
+                var wmSession6 = (IWMSession6)_wmSession;
+                oWMObject = wmSession6.GetNewWMObjectFS(WMEntity.WMEntityFolder, directoryPath, (int)WMObjectEditMode.WMObjectEditModeNoEdit);
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError("Error al crear el directorio en Windream: " + ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        // -------------------------------------------------------------------------------------------------------
+        // FUNCTION: DirectoryExists
+        // Función que comprueba si un directorio existe en Windream
+        // NBL 2024/04/17
+        // -------------------------------------------------------------------------------------------------------
+        public bool DirectoryExists(string directoryPath)
+        {
+            if (_wmSession == null)
+            {
+                throw new InvalidOperationException("La sesión de Windream no está inicializada.");
+            }
+
+            WMObject? oDirectory;
+            try
+            {
+                oDirectory = _wmSession.GetWMObjectByPath(WMEntity.WMEntityFolder, directoryPath);
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError("Error al comprobar si el directorio existe en Windream: " + ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private bool PrepareDocumentForEditing(WMObject document)
+        {
+            if (!document.IsEditableFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {
+                _fileLogger.LogError("No se puede editar el documento en Windream.");
+                return false;
+            }
+
+            if (!document.LockFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {
+                _fileLogger.LogError("No se puede bloquear el documento en Windream.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private bool UploadPdfToWindream(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType, WMObject document, bool isNewDocument)
+        {
+            try
+            {
+                WMFileIO oFileIO = new WMFileIO();
+                WMStream lobjWMStream = ((IWMObject2)document).OpenStream("BinaryObject", WMObjectStreamOpenMode.WMObjectStreamOpenModeReadWrite);
+                oFileIO.aWMStream = (WMOTOOLLib.IWMStream)lobjWMStream;
+
+                oFileIO.bstrOriginalFileName = pathPdf;
+                oFileIO.ImportOriginal(true);
+
+                if (isNewDocument)
+                {
+                    document.AddHistory($"Documento creado con el tipo {objectType.aName}");
+                    document.aObjectType = objectType;
+                    SetDocumentLifeCycle(document);
+                }
+
+                UpdateDocumentIndexes(document, windreamIndexes);
+                document.Save();
+                document.unlock();
+            }
+            catch (Exception ex)
+            {
+                if (document.aLocked)
+                {
+                    document.unlock();
+                }
+                _fileLogger.LogError("Error al subir el archivo a Windream: " + ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private void SetDocumentLifeCycle(WMObject document)
+        {
+            if (_serviceConfig.MonthsArchive > 0)
+            {
+                IWMObject2? oLifeCycle = document as IWMObject6;
+                WMLifeCycle lifeCycle = oLifeCycle!.aWMLifeCycle;
+
+                DateTime dtCurrent = DateTime.Now;
+                DateTime finalDate = dtCurrent.AddMonths(_serviceConfig.MonthsArchive);
+
+                lifeCycle.SetPeriodEndDate(WMLifeCycleType.WMLifeCycleTypeEditPeriod, finalDate);
+                lifeCycle.SetPeriodEndDate(WMLifeCycleType.WMLifeCycleTypeArchivePeriod, finalDate.AddDays(1));
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------------------------
+        private void UpdateDocumentIndexes(WMObject document, WindreamIndexes windreamIndexes)
+        {
+            if (!string.IsNullOrEmpty(windreamIndexes.NoFactura))
+            {
+                document.SetVariableValue("NoFactura", windreamIndexes.NoFactura);
+                document.AddHistory($"NoFactura: {windreamIndexes.NoFactura}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+            {
+                document.SetVariableValue("NoAutorizacion", windreamIndexes.NoAutorizacion);
+                document.AddHistory($"NoAutorizacion: {windreamIndexes.NoAutorizacion}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.Cobertura))
+            {
+                document.SetVariableValue("Cobertura", windreamIndexes.Cobertura);
+                document.AddHistory($"Cobertura: {windreamIndexes.Cobertura}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.CoberturaInforme))
+            {
+                document.SetVariableValue("CoberturaInforme", windreamIndexes.CoberturaInforme);
+                document.AddHistory($"CoberturaInforme: {windreamIndexes.CoberturaInforme}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NIFMutua))
+            {
+                document.SetVariableValue("NIFMutua", windreamIndexes.NIFMutua);
+                document.AddHistory($"NIFMutua: {windreamIndexes.NIFMutua}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NombrePaciente))
+            {
+                document.SetVariableValue("NombrePaciente", windreamIndexes.NombrePaciente);
+                document.AddHistory($"NombrePaciente: {windreamIndexes.NombrePaciente}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.DNIPaciente))
+            {
+                document.SetVariableValue("DNIPaciente", windreamIndexes.DNIPaciente);
+                document.AddHistory($"DNIPaciente: {windreamIndexes.DNIPaciente}");
+            }
+
+            if (windreamIndexes.FechaFactura.HasValue)
+            {
+                document.SetVariableValue("FechaFactura", windreamIndexes.FechaFactura);
+                document.AddHistory($"FechaFactura: {windreamIndexes.FechaFactura}");
+            }
+
+            if (windreamIndexes.TipoDoc != null)
+            {
+                document.SetVariableValue("TipoDoc", windreamIndexes.TipoDoc.ToString());
+                document.AddHistory($"TipoDoc: {windreamIndexes.TipoDoc}");
+            }
+        }
+
+
+        // ----------------------------------------------------------------------------------------------------------
+        public ArrayList BuscarDocumentos(WMObject objectType, List<(string campo, string valor, OperadorBusqueda operador)> searchTerms)
+        {
+            // Buscamos si ya existe una factura con el mismo número de factura
+            WMSearch wmSearch = _wmSession!.CreateWMSearch(WMEntity.WMEntityDocument);
+            // Restringimos por el tipo de documento
+            wmSearch.aWMObjectType = objectType;
+
+            // Añadimos los términos de búsqueda
+            foreach (var term in searchTerms)
+            {
+                if (term.operador == OperadorBusqueda.Igual)
+                {
+                    wmSearch.AddSearchTerm(term.campo, term.valor, WMSearchOperator.WMSearchOperatorEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
+                }
+                else
+                {
+                    wmSearch.AddSearchTerm(term.campo, term.valor, WMSearchOperator.WMSearchOperatorNotEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
+                }                
+            }
+
+            // Ejecutamos la búsqueda
+            WMObjects lobjSearchResult = wmSearch.ExecuteEx(WMSearchMode.WMSearchModeNoCount | WMSearchMode.WMSearchModeValues);
+
+            ArrayList lobjListaDocuments = new();
+            string[] VariablesNames = { "szLongName", "dwDocID", "dwDocDBID" };
+            int MAXFETCHCOUNT = 50;
+            Array ResultList;
+
+            try
+            {
+                ResultList = (Array)lobjSearchResult.GetValues(MAXFETCHCOUNT, 0, VariablesNames);
+                // Hacemos un bucle por cada uno
+                for (int lintContador = 0; lintContador <= ResultList.GetUpperBound(1); lintContador++)
+                {
+                    lobjListaDocuments.Add(lobjListaDocuments.Add(ResultList.GetValue(1, lintContador)));
+                }
+            }
+            catch (Exception)
+            {
+                // Si hay un error es que no hay datos para el número de petición dado
+                _fileLogger.LogInformation("No hay documentos para el criterio");
+            }
+
+            return lobjListaDocuments;
+        }
+
+        // -------------------------------------------------------------------------------------------------------
+        private bool importNoFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType, bool alwaysCreate = false)
+        {
+            // Solo tengo el número de autorización
+            // Busco si hay algún documento con el mismo número de autorización
+            var searchTerms = BuildSearchTermsAut(windreamIndexes);
+            var listaDocumentos = BuscarDocumentos(objectType, searchTerms);
+
+            WMObject document;
+            IWMSession2? wmSession2 = _wmSession as IWMSession2;
+
+            if (wmSession2 == null) {
+                _fileLogger.LogError("No se pudo obtener la sesión de Windream.");
+                return false;
+            }
+
+            // Desactivar el evento de indexación
+            wmSession2.SwitchEvents((int)WMCOMEvent.WMCOMEventWMSessionNeedIndex, false);
+
+            bool isNewDocument = false;
+
+            if (IsNewDocument(listaDocumentos) || alwaysCreate)
+            {
+                document = CreateNewDocument(wmSession2, windreamIndexes);
+                isNewDocument = true;
+            }
+            else
+            {
+                document = CreateNewVersion(listaDocumentos);
+                isNewDocument = false;
+            }
+
+            if (!PrepareDocumentForEditing(document))
+            {
+                return false;
+            }
+
+            bool uploadAutorizacion = UploadPdfToWindream(pathPdf, windreamIndexes, objectType, document, isNewDocument);
+
+            if (!uploadAutorizacion)
+            {
+                return false;
+            }
+
+            // Busco la factura con el mismo número de autorización, para actualizar indices
+            WindreamIndexes? windreamIndexesFactura = GetWindreamIndexesFromFactura(windreamIndexes.NoAutorizacion!, objectType);
+
+            if (windreamIndexesFactura != null)
+            {
+               if (PrepareDocumentForEditing(document))
+               {
+                    UpdateDocumentIndexesNoFactura(document, windreamIndexesFactura);
+                    document.Save();
+                    document.unlock();
+               }               
+            }
+            
+            return true;
+        }
+
+        // -------------------------------------------------------------------------------------------------------
+        public WindreamIndexes? GetWindreamIndexesFromFactura(string noAutorizacion, WMObject wmObject)
+        {
+            var searchTerms = BuildSearchTermsAut(
+                new WindreamIndexes
+                {
+                    NoAutorizacion = noAutorizacion,
+                    TipoDoc = TipoDocumento.Factura
+                }
+            );
+            var listaDocumentos = BuscarDocumentos(wmObject, searchTerms);
+
+            foreach (var documento in listaDocumentos)
+            {
+                try
+                {
+                    WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, (int)documento!);
+
+                    WindreamIndexes windreamIndexes = new WindreamIndexes
+                    {
+                        NoFactura = document.GetVariableValue("NoFactura") as string,
+                        Cobertura = document.GetVariableValue("Cobertura") as string,
+                        NIFMutua = document.GetVariableValue("NIFMutua") as string,
+                        NombrePaciente = document.GetVariableValue("NombrePaciente") as string,
+                        DNIPaciente = document.GetVariableValue("DNIPaciente") as string,
+                        FechaFactura = document.GetVariableValue("FechaFactura") as DateTime?
+                    };
+
+                    return windreamIndexes;
+                }
+                catch (Exception ex)
+                {
+                    _fileLogger.LogError($"Error retrieving document: {ex.Message}");
+                }
+            }
+
+            return null;
+        }
+
 
         // -------------------------------------------------------------------------------------------------------
         // FUNCTION: CreateWindreamSubfolders
@@ -214,59 +761,8 @@ namespace PdfProcessingService.Processors
             return false;
         }
 
-        // -------------------------------------------------------------------------------------------------------------------------------
-        // -------------------------------------------------------------------------------------------------------
-        // FUNCTION: CreateDirectory
-        // Función que crea un directorio en Windream
-        // NBL 2024/04/17
-        // -------------------------------------------------------------------------------------------------------
-        public bool CreateDirectory(string directoryPath)
-        {
-            if (_wmSession == null)
-            {
-                throw new InvalidOperationException("La sesión de Windream no está inicializada.");
-            }
 
-            WMObject oWMObject;
-            try
-            {
-                var wmSession6 = (IWMSession6)_wmSession;
-                oWMObject = wmSession6.GetNewWMObjectFS(WMEntity.WMEntityFolder, directoryPath, (int)WMObjectEditMode.WMObjectEditModeNoEdit);
-            }
-            catch (Exception ex)
-            {
-                _fileLogger.LogError("Error al crear el directorio en Windream: " + ex.Message);
-                return false;
-            }
 
-            return true;
-        }
 
-        // -------------------------------------------------------------------------------------------------------
-        // -------------------------------------------------------------------------------------------------------
-        // FUNCTION: DirectoryExists
-        // Función que comprueba si un directorio existe en Windream
-        // NBL 2024/04/17
-        // -------------------------------------------------------------------------------------------------------
-        public bool DirectoryExists(string directoryPath)
-        {
-            if (_wmSession == null)
-            {
-                throw new InvalidOperationException("La sesión de Windream no está inicializada.");
-            }
-
-            WMObject? oDirectory;
-            try
-            {
-                oDirectory = _wmSession.GetWMObjectByPath(WMEntity.WMEntityFolder, directoryPath);
-            }
-            catch (Exception ex)
-            {
-                _fileLogger.LogError("Error al comprobar si el directorio existe en Windream: " + ex.Message);
-                return false;
-            }
-
-            return true;
-        }
     }
 }

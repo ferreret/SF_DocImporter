@@ -74,6 +74,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="mutuas.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PdfProcessingService.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

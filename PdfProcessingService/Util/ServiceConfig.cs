@@ -7,11 +7,13 @@ namespace PdfProcessingService.Util
     public class ServiceConfig
     {
         public int FoldersCount { get; set; }
-        public List<(string path1, string path2)>? Folders { get; set; }
+        public List<(string path1, string path2, string path3)>? Folders { get; set; }
         public string? LogFolder { get; set; }
         public int DelaySeconds { get; set; }
         public string? WindreamPath { get; set; }
         public string? ObjectType { get; set; }
+        public int MonthsArchive { get; set; }
+        public int MaxLevensthein { get; set; }
 
 
         public ServiceConfig(string path)
@@ -26,7 +28,7 @@ namespace PdfProcessingService.Util
             FoldersCount = folderCount;
 
             // Inicializar la lista de carpetas
-            Folders = new List<(string path1, string path2)>(); // Cambio de tipo de lista
+            Folders = new List<(string path1, string path2, string path3)>(); // Cambio de tipo de lista
 
             for (int i = 1; i <= FoldersCount; i++)
             {
@@ -45,7 +47,14 @@ namespace PdfProcessingService.Util
                     throw new DirectoryNotFoundException($"La carpeta especificada no existe: {folderPath2}");
                 }
 
-                Folders.Add((folderPath1, folderPath2));
+                string folderPath3 = iniFile.ReadValue("ImportFolders", $"FolderIncidencias{i}");
+
+                if (!Directory.Exists(folderPath3))
+                {
+                    throw new DirectoryNotFoundException($"La carpeta especificada no existe: {folderPath3}");
+                }
+
+                Folders.Add((folderPath1, folderPath2, folderPath3));
             }
 
             // Obtener la ruta de la carpeta de logs
@@ -66,6 +75,20 @@ namespace PdfProcessingService.Util
 
             WindreamPath = iniFile.ReadValue("Windream", "Path");
             ObjectType = iniFile.ReadValue("Windream", "ObjectType");
+
+            // Validamos que los meses de antigüedad sean un entero válido
+            if (!int.TryParse(iniFile.ReadValue("Windream", "MesesArchivo"), out int monthsArchive))
+            {
+                throw new FormatException("El valor 'MonthsArchive' no es un entero válido.");
+            }
+            MonthsArchive = monthsArchive;
+
+            // Validamos que la distancia de Levenshtein máxima sea un entero válido
+            if (!int.TryParse(iniFile.ReadValue("Service", "MaxLevensthein"), out int maxLevensthein))
+            {
+                throw new FormatException("El valor 'MaxLevensthein' no es un entero válido.");
+            }
+            MaxLevensthein = maxLevensthein;
 
         }
     }
