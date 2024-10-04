@@ -123,6 +123,17 @@ namespace PdfProcessingService.Processors
             windreamIndexes.CoberturaInforme = cobertura is null ? String.Empty : cobertura.RemoveCarriageReturns();
             windreamIndexes.NoAutorizacion = autorizacion is null ? String.Empty : autorizacion.RemoveCarriageReturns();
             windreamIndexes.TipoDoc = TipoDocumento.Informe;
+
+            // Si el informe no he recuperado el No de Autorización, lo recupero del nombre del archivo sin la I final y la extensión
+            // Comprobar previamente que el nombre del archivo acaba con I
+            if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+            {
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathPdf);
+                if (fileNameWithoutExtension.EndsWith("I"))
+                {
+                    windreamIndexes.NoAutorizacion = fileNameWithoutExtension.Remove(fileNameWithoutExtension.Length - 1);
+                }
+            }
         }
 
         public static char ObtenerUltimoCaracterSinExtension(string filePath)

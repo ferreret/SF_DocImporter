@@ -324,7 +324,7 @@ namespace PdfProcessingService.Processors
         // --------------------------------------------------------------------------------------------------------------------------------------
         private WMObject CreateNewDocument(IWMSession2 wmSession2, WindreamIndexes windreamIndexes)
         {
-            _fileLogger.LogInformation("No se encontró la factura en Windream, se procede a crearla.");
+            _fileLogger.LogInformation("No se encontró el documento en Windream, se procede a crearlo.");
 
             string targetFolder = CreateWindreamSubfolders();
 

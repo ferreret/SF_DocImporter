@@ -1,5 +1,7 @@
 using System;
+using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace PdfProcessingService.Util
@@ -52,14 +54,31 @@ namespace PdfProcessingService.Util
             }
         }
 
-        public void LogInformation(string message)
+        public void LogInformation(string message, ConsoleColor? textColor = null)
         {
+            textColor ??= ConsoleColor.White;
             Log(message, FileLogLevel.Information);
+
+            // Change console color if it's different to white
+            if (Console.ForegroundColor != ConsoleColor.White)
+            {
+                Console.ForegroundColor = (ConsoleColor)textColor;
+                Console.WriteLine(message);
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.WriteLine(message);
+            }
         }
 
         public void LogError(string message)
         {
             Log(message, FileLogLevel.Error);
+            // Log to console as well with red color
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
     }
 
