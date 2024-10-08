@@ -13,6 +13,7 @@ namespace LibDataExtractor
     {
 
         FileLogger _fileLogger;
+        ServiceConfig _serviceConfig;
 
 #pragma warning disable CS8618 // Un campo que no acepta valores NULL debe contener un valor distinto de NULL al salir del constructor. Considere la posibilidad de agregar el modificador "required" o declararlo como un valor que acepta valores NULL.
         public MetaDataExtractor()
@@ -31,9 +32,10 @@ namespace LibDataExtractor
             Vintasoft.Imaging.Drawing.SkiaSharp.SkiaSharpDrawingFactory.SetAsDefault();
         }
 
-        public WindreamIndexes Extract(string pathPdf, FileLogger fileLogger)
+        public WindreamIndexes Extract(string pathPdf, FileLogger fileLogger, ServiceConfig serviceConfig)
         {
             _fileLogger = fileLogger;
+            _serviceConfig = serviceConfig;
 
             WindreamIndexes windreamIndexes = new();
 
@@ -78,7 +80,7 @@ namespace LibDataExtractor
         private void ProcessFactura(string pathPdf, WindreamIndexes windreamIndexes)
         {
             // Extraer los metadatos de una factura
-            Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, @".\Templates\TemplateFactura.json");
+            Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, _serviceConfig.PathTemplateFactura! , _fileLogger);
 
             // Si la factura no es nula, mapeamos los datos a los índices de Windream
             if (factura != null)

@@ -16,7 +16,8 @@ namespace LibUtil
         public string? ObjectType { get; set; }
         public int MonthsArchive { get; set; }
         public int MaxLevensthein { get; set; }
-
+        public string? PathTemplateFactura { get; set; }
+        public string? PathMutuas { get; set; }
 
         public ServiceConfig(string path)
         {
@@ -92,6 +93,20 @@ namespace LibUtil
             }
             MaxLevensthein = maxLevensthein;
 
+            // Validamos que exista la ruta de la plantilla de la factura
+            PathTemplateFactura = iniFile.ReadValue("Service", "PathTemplateFactura");
+
+            if (PathTemplateFactura == null || !File.Exists(PathTemplateFactura))
+            {
+                throw new FileNotFoundException($"La plantilla de la factura no existe en la ruta especificada: {PathTemplateFactura}");
+            }
+
+            PathMutuas = iniFile.ReadValue("Service", "PathMutuas");
+
+            if (PathMutuas == null || !File.Exists(PathMutuas))
+            {
+                throw new FileNotFoundException($"El archivo de mutuas no existe en la ruta especificada: {PathMutuas}");
+            }
         }
     }
 }

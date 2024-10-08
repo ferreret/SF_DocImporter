@@ -76,7 +76,7 @@ namespace LibWin
             else if (windreamIndexes.TipoDoc == TipoDocumento.Factura)
             {
                 // Si no tenemos el número de factura, no podemos trabajar con el documento
-                if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || string.IsNullOrEmpty(windreamIndexes.NoAutorizacion) || !ValidateMutua(windreamIndexes.Cobertura))
+                if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || string.IsNullOrEmpty(windreamIndexes.NoAutorizacion) || !ValidateMutua(windreamIndexes.Cobertura, _serviceConfig.PathMutuas!))
                 {
                     _fileLogger.LogError("Faltan datos claves en la Factura. Factura/Autorización/");
                     return false;
@@ -102,14 +102,14 @@ namespace LibWin
         }
 
         // -------------------------------------------------------------------------------------------------------
-        private bool ValidateMutua(string? cobertura)
+        private bool ValidateMutua(string? cobertura, string pathMutuas)
         {
             if (string.IsNullOrEmpty(cobertura))
             {
                 return false;
             }
 
-            var result = LibUtil.Common.FindUniqueMinLevenshtein("mutuas.txt", cobertura);
+            var result = LibUtil.Common.FindUniqueMinLevenshtein(pathMutuas, cobertura);
 
             if (result.Item1 != null)
             {

@@ -126,7 +126,7 @@ namespace PdfProcessingService
             WindreamIndexes metadata;
             try
             {
-                metadata = _extractor.Extract(file, _fileLogger);
+                metadata = _extractor.Extract(file, _fileLogger, config);
                 _fileLogger.LogInformation(metadata.ToString());
             }
             catch (Exception ex)

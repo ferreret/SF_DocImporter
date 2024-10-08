@@ -1,4 +1,5 @@
-﻿using LibUtil.Models;
+﻿using LibUtil;
+using LibUtil.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,19 @@ namespace LibDataExtractor
         /// <param name="pdf">Documento PDF a procesar.</param>
         /// <param name="jsonPath">Ruta del archivo JSON que contiene la definición del documento.</param>
         /// <returns>Una instancia de Factura o null si no se encuentran suficientes identificadores.</returns>
-        public static Factura? ApplyFacturaTemplate(string pathPdf, string jsonPath)
+        public static Factura? ApplyFacturaTemplate(string pathPdf, string jsonPath, FileLogger fileLogger)
         {
             using var pdf = new PdfDocument(pathPdf);
             var documentDefinition = LoadDocumentDefinition(jsonPath);
-            if (documentDefinition == null) return null;
-
+            if (documentDefinition == null)
+            {
+                fileLogger.LogError($"Error al cargar la definición del documento: {jsonPath}");
+                return null;
+            }
+                
             if (!CheckIdentifiers(pdf, documentDefinition))
             {
+                fileLogger.LogError("No se han encontrado suficientes identificadores");
                 return null;
             }
 
@@ -48,7 +54,7 @@ namespace LibDataExtractor
                 return JsonSerializer.Deserialize<DocumentDefinition>(json);
             }
             catch (Exception ex)
-            {
+            {               
                 Console.WriteLine($"Error al cargar la definición del documento: {ex.Message}");
                 return null;
             }
