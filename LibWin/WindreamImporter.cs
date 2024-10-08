@@ -1,21 +1,14 @@
-﻿using PdfProcessingService.Models;
-using PdfProcessingService.Util;
-using System;
+﻿using LibUtil;
+using LibUtil.Models;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vintasoft.Imaging.Pdf.Tree.InteractiveForms;
 using WINDREAMLib;
 using WMCNNCTDLLLib;
 using WMOBRWSLib;
 using WMOMISCDLLLib;
 using WMOTOOLLib;
 
-namespace PdfProcessingService.Processors
+namespace LibWin
 {
-
     public enum OperadorBusqueda
     {
         Igual,
@@ -25,7 +18,7 @@ namespace PdfProcessingService.Processors
     public sealed class WindreamImporter
     {
         // Declaramos las variables de módulo para la funcionalidad de Windream
-        WMSession?_wmSession;
+        WMSession? _wmSession;
         WMConnect? _wmConnect;
         WMMsgHandler? _wmMsgHandler;
         ServerBrowser? _serverBrowser;
@@ -105,7 +98,7 @@ namespace PdfProcessingService.Processors
                 _fileLogger.LogError("Tipo de documento no soportado.");
                 return false;
             }
-            
+
         }
 
         // -------------------------------------------------------------------------------------------------------
@@ -116,7 +109,7 @@ namespace PdfProcessingService.Processors
                 return false;
             }
 
-            var result = Util.Common.FindUniqueMinLevenshtein("mutuas.txt", cobertura);
+            var result = LibUtil.Common.FindUniqueMinLevenshtein("mutuas.txt", cobertura);
 
             if (result.Item1 != null)
             {
@@ -233,7 +226,7 @@ namespace PdfProcessingService.Processors
                             docNoFactura.unlock();
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         _fileLogger.LogError($"Documento no válido.");
                     }
@@ -244,7 +237,7 @@ namespace PdfProcessingService.Processors
         // --------------------------------------------------------------------------------------------------------------------------------------
         private void UpdateDocumentIndexesNoFactura(WMObject document, WindreamIndexes windreamIndexes)
         {
-            
+
 
             if (!string.IsNullOrEmpty(windreamIndexes.NoFactura))
             {
@@ -334,8 +327,8 @@ namespace PdfProcessingService.Processors
             else if (windreamIndexes.TipoDoc == TipoDocumento.Autorización)
                 matchingFileName = windreamIndexes.NoAutorizacion! + "A.pdf";
             else
-                matchingFileName = windreamIndexes.NoAutorizacion! + "-" + Common.GenerateUniqueIdentifier() + "-" +  "I.pdf";
-            
+                matchingFileName = windreamIndexes.NoAutorizacion! + "-" + Common.GenerateUniqueIdentifier() + "-" + "I.pdf";
+
             // string matchingFileName = windreamIndexes.NoAutorizacion! + "F.pdf";
             string documentPath = Path.Combine(targetFolder, matchingFileName);
 
@@ -557,7 +550,7 @@ namespace PdfProcessingService.Processors
                 else
                 {
                     wmSearch.AddSearchTerm(term.campo, term.valor, WMSearchOperator.WMSearchOperatorNotEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
-                }                
+                }
             }
 
             // Ejecutamos la búsqueda
@@ -597,7 +590,8 @@ namespace PdfProcessingService.Processors
             WMObject document;
             IWMSession2? wmSession2 = _wmSession as IWMSession2;
 
-            if (wmSession2 == null) {
+            if (wmSession2 == null)
+            {
                 _fileLogger.LogError("No se pudo obtener la sesión de Windream.");
                 return false;
             }
@@ -635,14 +629,14 @@ namespace PdfProcessingService.Processors
 
             if (windreamIndexesFactura != null)
             {
-               if (PrepareDocumentForEditing(document))
-               {
+                if (PrepareDocumentForEditing(document))
+                {
                     UpdateDocumentIndexesNoFactura(document, windreamIndexesFactura);
                     document.Save();
                     document.unlock();
-               }               
+                }
             }
-            
+
             return true;
         }
 
@@ -720,9 +714,9 @@ namespace PdfProcessingService.Processors
                 string? lstrServidor;
                 lstrServidor = _serverBrowser.GetCurrentServer();
 
-                if (lstrServidor != null && lstrServidor.Length > 0 )
+                if (lstrServidor != null && lstrServidor.Length > 0)
                 {
-                    Type? lobjSrvType = Type.GetTypeFromProgID("Windream.WMSession", lstrServidor, true);                    
+                    Type? lobjSrvType = Type.GetTypeFromProgID("Windream.WMSession", lstrServidor, true);
                     _wmConnect.ServerName = lstrServidor;
                     if (lobjSrvType != null)
                     {
@@ -760,9 +754,5 @@ namespace PdfProcessingService.Processors
 
             return false;
         }
-
-
-
-
     }
 }

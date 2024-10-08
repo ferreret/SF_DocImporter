@@ -1,10 +1,10 @@
-using System;
-using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PdfProcessingService.Util
+namespace LibUtil
 {
     public class FileLogger
     {
@@ -29,7 +29,7 @@ namespace PdfProcessingService.Util
         }
 
         private string GetLogFilePath()
-        {            
+        {
             string fileName = $"{DateTime.Now:yyyyMMdd}.log";
             return Path.Combine(_logFilePath, fileName);
         }

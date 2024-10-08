@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PdfProcessingService.Models
+namespace LibUtil.Models
 {
     public class SearchRectangle
     {

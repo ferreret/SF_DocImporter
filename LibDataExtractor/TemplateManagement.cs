@@ -1,13 +1,14 @@
-﻿using PdfProcessingService.Models;
+﻿using LibUtil.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Vintasoft.Imaging.Pdf;
 using Vintasoft.Imaging.Text;
 
-namespace PdfProcessingService.Pdf
+namespace LibDataExtractor
 {
     public class TemplateManagement
     {

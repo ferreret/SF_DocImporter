@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PdfProcessingService.Models
+namespace LibUtil.Models
 {
     public class WindreamIndexes
     {
-        public  string?  NoAutorizacion { get; set; }
+        public string? NoAutorizacion { get; set; }
         public string? Cobertura { get; set; }
         public string? NIFMutua { get; set; }
         public string? NombrePaciente { get; set; }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PdfProcessingService.Util
+namespace LibUtil
 {
     public static class StringExtensions
     {

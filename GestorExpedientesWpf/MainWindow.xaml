@@ -1,0 +1,115 @@
+﻿<Window x:Class="GestorExpedientesWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GestorExpedientesWpf"
+        mc:Ignorable="d"
+        Title="Gestión de expedientes" WindowState="Maximized" Height="1200" Width="1920">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" MinWidth="100"/>
+            <!-- Primera columna para filtros y grids -->
+            <ColumnDefinition Width="2*" MinWidth="100"/>
+            <!-- Segunda columna para el visor de documentos -->
+        </Grid.ColumnDefinitions>
+        <GridSplitter Grid.Column="0" Width="5" HorizontalAlignment="Right" Background="Gray"/>
+
+        <!-- Primera columna: Filtros y grids -->
+        <Grid Grid.Column="0" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Filtros -->
+                <RowDefinition Height="Auto"/>
+                <!-- Título del grid central -->
+                <RowDefinition Height="4*"/>
+                <!-- Grid central -->
+                <RowDefinition Height="*"/>
+                <!-- Grid pequeño -->
+            </Grid.RowDefinitions>
+
+            <!-- Cabecera de selección (Filtros) -->
+            <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,0,0,10">
+                <TextBlock Text="Selección de documentos" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                <!-- Activar/Desactivar filtro entre dos fechas -->
+                <CheckBox Content="Aplicar filtro de fechas" Margin="0,5,0,0" Name="chkFechaFiltro"/>
+                <!-- Filtro entre dos fechas con otros checks -->
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0"/>
+                    <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0"/>
+                    <CheckBox Content="Mostrar solo documentos huérfanos" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    <CheckBox Content="Ignorar documentos con remesa" IsChecked="True" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <!-- Botón de actualizar -->
+                <Button Content="Actualizar" Margin="0,10,0,0" HorizontalAlignment="Right" Width="100"/>
+            </StackPanel>
+
+            <!-- Grid central con título -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                <TextBlock Text="Resultado consulta" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                <DataGrid Margin="0,0,0,10" AutoGenerateColumns="False">
+                    <!-- Define las columnas del DataGrid aquí -->
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDocumento}"/>
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion}"/>
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura}"/>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+
+            <!-- Grid pequeño con título -->
+            <StackPanel Grid.Row="3" Margin="0,0,0,10">
+                <TextBlock Text="Selección" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                <DataGrid AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDocumento}"/>
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion}"/>
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura}"/>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Grid>
+
+        <!-- Segunda columna: Visor de documentos -->
+        <TabControl Grid.Column="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <!-- Pestaña para el visor principal del documento -->
+            <TabItem Header="Visor de Documento">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                    <Border Background="LightGray" Padding="10">
+                        <TextBlock Text="Contenido del documento aquí..." FontSize="14"/>
+                    </Border>
+                </ScrollViewer>
+            </TabItem>
+            <!-- Pestaña para las propiedades del documento -->
+            <TabItem Header="Propiedades del Documento">
+                <StackPanel Margin="10">
+                    <TextBlock Text="Propiedades del documento" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+                    <TextBlock Text="Nombre del documento: " Margin="0,5,0,0"/>
+                    <TextBox Width="200"/>
+                    <TextBlock Text="Tamaño: " Margin="0,5,0,0"/>
+                    <TextBox Width="200"/>
+                    <TextBlock Text="Fecha de creación: " Margin="0,5,0,0"/>
+                    <TextBox Width="200"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

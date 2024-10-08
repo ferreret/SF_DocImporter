@@ -1,15 +1,13 @@
-﻿using PdfProcessingService.Models;
-using PdfProcessingService.Pdf;
-using PdfProcessingService.Util;
+﻿using LibUtil;
+using LibUtil.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using Vintasoft.Imaging;
 
-namespace PdfProcessingService.Processors
+namespace LibDataExtractor
 {
     public class MetaDataExtractor
     {
@@ -80,7 +78,7 @@ namespace PdfProcessingService.Processors
         private void ProcessFactura(string pathPdf, WindreamIndexes windreamIndexes)
         {
             // Extraer los metadatos de una factura
-            Factura? factura =TemplateManagement.ApplyFacturaTemplate(pathPdf, @".\Templates\TemplateFactura.json");
+            Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, @".\Templates\TemplateFactura.json");
 
             // Si la factura no es nula, mapeamos los datos a los índices de Windream
             if (factura != null)
@@ -104,7 +102,7 @@ namespace PdfProcessingService.Processors
                     {
                         _fileLogger.LogError("Error al parsear la fecha de la factura.");
                     }
-                }   
+                }
 
             }
         }

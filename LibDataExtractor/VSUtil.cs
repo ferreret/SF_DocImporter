@@ -1,14 +1,12 @@
-﻿using PdfProcessingService.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
 using System.Text.RegularExpressions;
+using System.Text;
 using Vintasoft.Imaging.Pdf;
-using Vintasoft.Imaging.Pdf.Tree;
+using LibUtil.Models;
 using Vintasoft.Imaging.Text;
+using Vintasoft.Imaging.Pdf.Tree;
 
-namespace PdfProcessingService.Pdf
+namespace LibDataExtractor
 {
     public class VSUtil
     {

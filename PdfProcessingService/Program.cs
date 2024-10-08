@@ -2,7 +2,8 @@ using PdfProcessingService;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
 using System.Runtime.Versioning;
-using PdfProcessingService.Processors;
+using LibDataExtractor;
+using LibWin;
 
 [assembly: SupportedOSPlatform("windows")]
 
