@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using GestorExpedientesWpf.Models;
+using GestorExpedientesWpf.ViewModels;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,7 +20,28 @@ namespace GestorExpedientesWpf
     {
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();            
+        }
+
+        private void ResultadosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGrid dataGrid && dataGrid.SelectedItem is Expediente selectedExpediente)
+            {
+                var viewModel = DataContext as ExpedientesViewModel;
+                if (viewModel?.AddSeleccionCommand.CanExecute(selectedExpediente) == true)
+                {
+                    viewModel.AddSeleccionCommand.Execute(selectedExpediente);
+                }
+            }
+        }
+
+        private void SeleccionadosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGrid dataGrid && dataGrid.SelectedItem is Expediente selectedExpediente)
+            {
+                var viewModel = DataContext as ExpedientesViewModel;
+                viewModel?.RemoveSeleccionCommand.Execute(selectedExpediente);
+            }
         }
     }
 }

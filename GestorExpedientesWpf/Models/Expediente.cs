@@ -1,0 +1,160 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GestorExpedientesWpf.Models
+{
+    public class Expediente : INotifyPropertyChanged
+    {
+        private int _docID;
+        private string? _rutaWindream;
+        private string? _noAutorizacion;
+        private DateTime _fechaCreacion;
+        private string? _cobertura;
+        private string? _nifMutua;
+        private string? _nombrePaciente;
+        private string? _dniPaciente;
+        private DateTime _fechaFactura;
+        private string? _noFactura;
+        private string? _remesa;
+        private string? _coberturaInforme;
+        private string? _tipoDoc;
+        private bool _isOrphan;
+
+        public int DocID
+        {
+            get => _docID;
+            set
+            {
+                _docID = value;
+                OnPropertyChanged(nameof(DocID));
+            }
+        }
+        public string? RutaWindream
+        {
+            get => _rutaWindream ?? string.Empty;
+            set
+            {
+                _rutaWindream = value;
+                OnPropertyChanged(nameof(RutaWindream));
+            }
+        }
+        public string NoAutorizacion
+        {
+            get => _noAutorizacion ?? string.Empty;
+            set
+            {
+                _noAutorizacion = value;
+                OnPropertyChanged(nameof(NoAutorizacion));
+            }
+        }
+        public DateTime FechaCreacion
+        {
+            get => _fechaCreacion;
+            set
+            {
+                _fechaCreacion = value;
+                OnPropertyChanged(nameof(FechaCreacion));
+            }
+        }
+        public string Cobertura
+        {
+            get => _cobertura ?? string.Empty;
+            set
+            {
+                _cobertura = value;
+                OnPropertyChanged(nameof(Cobertura));
+            }
+        }
+        public string NIFMutua
+        {
+            get => _nifMutua ?? string.Empty;
+            set
+            {
+                _nifMutua = value;
+                OnPropertyChanged(nameof(NIFMutua));
+            }
+        }
+        public string NombrePaciente
+        {
+            get => _nombrePaciente ?? string.Empty;
+            set
+            {
+                _nombrePaciente = value;
+                OnPropertyChanged(nameof(NombrePaciente));
+            }
+        }
+        public string DNIPaciente
+        {
+            get => _dniPaciente ?? string.Empty;
+            set
+            {
+                _dniPaciente = value;
+                OnPropertyChanged(nameof(DNIPaciente));
+            }
+        }
+        public DateTime FechaFactura
+        {
+            get => _fechaFactura;
+            set
+            {
+                _fechaFactura = value;
+                OnPropertyChanged(nameof(FechaFactura));
+            }
+        }
+        public string NoFactura
+        {
+            get => _noFactura ?? string.Empty;
+            set
+            {
+                _noFactura = value;
+                OnPropertyChanged(nameof(NoFactura));
+            }
+        }
+        public string Remesa
+        {
+            get => _remesa ?? string.Empty;
+            set
+            {
+                _remesa = value;
+                OnPropertyChanged(nameof(Remesa));
+            }
+        }
+        public string CoberturaInforme
+        {
+            get => _coberturaInforme ?? string.Empty;
+            set
+            {
+                _coberturaInforme = value;
+                OnPropertyChanged(nameof(CoberturaInforme));
+            }
+        }
+        public string TipoDoc
+        {
+            get => _tipoDoc ?? string.Empty;
+            set
+            {
+                _tipoDoc = value;
+                OnPropertyChanged(nameof(TipoDoc));
+            }
+        }
+        public bool IsOrphan
+        {
+            get => _isOrphan;
+            set
+            {
+                _isOrphan = value;
+                OnPropertyChanged(nameof(IsOrphan));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}

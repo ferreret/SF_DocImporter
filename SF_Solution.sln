@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibUtil", "LibCommon\LibUti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibDataExtractor", "LibDataExtractor\LibDataExtractor.csproj", "{304ABE29-3B88-4994-907C-F52A008C5283}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibWin", "LibWin\LibWin.csproj", "{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibWin", "LibWin\LibWin.csproj", "{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
