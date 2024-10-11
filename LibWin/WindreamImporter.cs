@@ -567,7 +567,7 @@ namespace LibWin
                 // Hacemos un bucle por cada uno
                 for (int lintContador = 0; lintContador <= ResultList.GetUpperBound(1); lintContador++)
                 {
-                    lobjListaDocuments.Add(lobjListaDocuments.Add(ResultList.GetValue(1, lintContador)));
+                    lobjListaDocuments.Add(ResultList.GetValue(1, lintContador));
                 }
             }
             catch (Exception)

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -14,6 +15,8 @@ namespace GestorExpedientesWpf.ViewModels
 {
     public class ExpedientesViewModel : INotifyPropertyChanged
     {
+        private readonly Windream _windream;
+
         private ObservableCollection<Expediente>? _expedientes;
         private ObservableCollection<Expediente>? _seleccionados;
 
@@ -29,6 +32,22 @@ namespace GestorExpedientesWpf.ViewModels
         private bool _mostrarSoloDocumentosHuerfanos;
 
         private ICollectionView _expedientesView;
+
+        private Expediente? _selectedExpediente;
+        
+        public string SelectedExpedienteUrl => SelectedExpediente?.RutaWindream ?? "about:blank";
+
+        public Expediente? SelectedExpediente
+        {
+            get => _selectedExpediente;
+            set
+            {
+                _selectedExpediente = value;
+                //MessageBox.Show($"Expediente seleccionado: {value?.RutaWindream}");
+                OnPropertyChanged(nameof(SelectedExpediente));
+                OnPropertyChanged(nameof(SelectedExpedienteUrl));
+            }
+        }
 
         public ObservableCollection<Expediente> Expedientes
         {
@@ -125,6 +144,8 @@ namespace GestorExpedientesWpf.ViewModels
             // No muestro los datos de los expedientes en el constructor
             // CargarExpedientes();
 
+            _windream = new Windream();
+
             // Inicializo las fechas con el día de hoy
             FechaInicio = DateTime.Now;
             FechaFin = DateTime.Now;
@@ -141,7 +162,8 @@ namespace GestorExpedientesWpf.ViewModels
         public void CargarExpedientes(bool aplicarFiltroFechas, DateTime fechaInicio, DateTime fechaFin)
         {
             // Cargar expedientes de prueba
-            var expedientes = MockExpedientes.GetExpedientes();
+            //var expedientes = MockExpedientes.GetExpedientes();
+             var expedientes = _windream.GetExpedientes(aplicarFiltroFechas, fechaInicio, fechaFin);
 
             Expedientes = expedientes;
             CalcularIsOrphan();
