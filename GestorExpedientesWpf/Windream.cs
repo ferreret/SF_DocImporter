@@ -212,5 +212,61 @@ namespace GestorExpedientesWpf
         {
             return AppDomain.CurrentDomain.BaseDirectory;
         }
+
+        public void AsignarMetadatosAExpedientes(Expediente editExpediente, ObservableCollection<Expediente> seleccionados)
+        {
+            // Implementación de la función que asigna metadatos
+            if (!Login2Windream())
+            {
+                throw new InvalidOperationException("No se pudo conectar a Windream.");
+            }
+
+            // Hacemos un bucle por cada expediente seleccionado
+            foreach (Expediente expediente in seleccionados)
+            {
+                try
+                {
+                    WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, expediente.DocID);
+
+                    if (!PrepareDocumentForEditing(document))
+                    {
+                        MessageBox.Show("No se pudo bloquear el documento para edición.", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+                        continue;
+                    }
+
+                    document.SetVariableValue("NoAutorizacion", editExpediente.NoAutorizacion);
+                    document.SetVariableValue("Cobertura", editExpediente.Cobertura);
+                    document.SetVariableValue("NIFMutua", editExpediente.NIFMutua);
+                    document.SetVariableValue("NombrePaciente", editExpediente.NombrePaciente);
+                    document.SetVariableValue("DNIPaciente", editExpediente.DNIPaciente);
+                    document.SetVariableValue("FechaFactura", editExpediente.FechaFactura);
+                    document.SetVariableValue("NoFactura", editExpediente.NoFactura);
+                    document.SetVariableValue("Remesa", editExpediente.Remesa);
+                    document.SetVariableValue("CoberturaInforme", editExpediente.CoberturaInforme);
+
+                    document.Save();
+                    document.unlock();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private bool PrepareDocumentForEditing(WMObject document)
+        {
+            if (!document.IsEditableFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {                
+                return false;
+            }
+
+            if (!document.LockFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {             
+                return false;
+            }
+
+            return true;
+        }
     }
 }

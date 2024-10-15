@@ -15,6 +15,8 @@ namespace GestorExpedientesWpf.ViewModels
 {
     public class ExpedientesViewModel : INotifyPropertyChanged
     {
+        #region Campos Privados
+
         private readonly Windream _windream;
 
         private ObservableCollection<Expediente>? _expedientes;
@@ -27,6 +29,10 @@ namespace GestorExpedientesWpf.ViewModels
         private ICommand _actualizarCommand;
         private ICommand _addSeleccionCommand;
         private ICommand _removeSeleccionCommand;
+        private ICommand _asignarMetadatosCommand;
+        private ICommand _showEditMetadataCommand;
+        private ICommand _cancelEditMetadataCommand;
+        private ICommand _setMetadataCommand;    
 
         private bool _ignorarDocumentosConRemesa;
         private bool _mostrarSoloDocumentosHuerfanos;
@@ -34,8 +40,46 @@ namespace GestorExpedientesWpf.ViewModels
         private ICollectionView _expedientesView;
 
         private Expediente? _selectedExpediente;
-        
+        private Expediente? _editExpediente;
+        private bool _isBusy;
+        private bool _asegurarTriplete;
+        private bool _editMetadataMode;
+
+        #endregion
+
+        #region Propiedades Públicas
+
         public string SelectedExpedienteUrl => SelectedExpediente?.RutaWindream ?? "about:blank";
+
+        public bool AsegurarTriplete
+        {
+            get => _asegurarTriplete;
+            set
+            {
+                _asegurarTriplete = value;
+                OnPropertyChanged(nameof(AsegurarTriplete));
+            }
+        }
+
+        public bool EditMetadataMode
+        {
+            get => _editMetadataMode;
+            set
+            {               
+               _editMetadataMode = value;
+               OnPropertyChanged(nameof(EditMetadataMode));
+            }
+        }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
+        }
 
         public Expediente? SelectedExpediente
         {
@@ -43,9 +87,18 @@ namespace GestorExpedientesWpf.ViewModels
             set
             {
                 _selectedExpediente = value;
-                //MessageBox.Show($"Expediente seleccionado: {value?.RutaWindream}");
                 OnPropertyChanged(nameof(SelectedExpediente));
                 OnPropertyChanged(nameof(SelectedExpedienteUrl));
+            }
+        }
+
+        public Expediente? EditExpediente
+        {
+            get => _editExpediente;
+            set
+            {
+                _editExpediente = value;
+                OnPropertyChanged(nameof(EditExpediente));
             }
         }
 
@@ -88,7 +141,6 @@ namespace GestorExpedientesWpf.ViewModels
         public int FacturasCount => ExpedientesView?.Cast<Expediente>().Count(e => e.TipoDoc == "Factura") ?? 0;
         public int InformesCount => ExpedientesView?.Cast<Expediente>().Count(e => e.TipoDoc == "Informe") ?? 0;
 
-
         public bool IgnorarDocumentosConRemesa
         {
             get => _ignorarDocumentosConRemesa;
@@ -120,6 +172,7 @@ namespace GestorExpedientesWpf.ViewModels
                 OnPropertyChanged(nameof(AplicarFiltroFechas));
             }
         }
+
         public DateTime FechaInicio
         {
             get => _fechaInicio;
@@ -129,6 +182,7 @@ namespace GestorExpedientesWpf.ViewModels
                 OnPropertyChanged(nameof(FechaInicio));
             }
         }
+
         public DateTime FechaFin
         {
             get => _fechaFin;
@@ -139,35 +193,67 @@ namespace GestorExpedientesWpf.ViewModels
             }
         }
 
+        #endregion
+
+        #region Comandos
+
+        public ICommand ActualizarCommand => _actualizarCommand ??= new RelayCommand(param => Actualizar(), null);
+        public ICommand AddSeleccionCommand => _addSeleccionCommand ??= new RelayCommand<Expediente>(AgregarSeleccionado);
+        public ICommand RemoveSeleccionCommand => _removeSeleccionCommand ??= new RelayCommand<Expediente>(QuitarSeleccionado);
+        public ICommand AsignarMetadatosCommand => _asignarMetadatosCommand ??= new RelayCommand(param => AsignarMetadatos(), null);
+        public ICommand ShowEditMetadataCommand => _showEditMetadataCommand ??= new RelayCommand(param => EditMetadataMode = true, null);
+        public ICommand CancelEditMetadataCommand => _cancelEditMetadataCommand ??= new RelayCommand(param => EditMetadataMode = false, null);
+        public ICommand SetMetadataCommand => _setMetadataCommand ??= new RelayCommand(param => SetMetadata(), null);
+
+        #endregion
+
+        #region Constructor
+
         public ExpedientesViewModel()
         {
-            // No muestro los datos de los expedientes en el constructor
-            // CargarExpedientes();
-
             _windream = new Windream();
 
-            // Inicializo las fechas con el día de hoy
             FechaInicio = DateTime.Now;
             FechaFin = DateTime.Now;
 
-            // Inicializo el comando
-            _actualizarCommand = new RelayCommand(param => this.Actualizar(), null);
-            _addSeleccionCommand = new RelayCommand<Expediente>(AgregarSeleccionado);
-            _removeSeleccionCommand = new RelayCommand<Expediente>(QuitarSeleccionado);
-
             IgnorarDocumentosConRemesa = true;
             MostrarSoloDocumentosHuerfanos = false;
+            AsegurarTriplete = true;
+            EditMetadataMode = false;
+
         }
+
+        #endregion
+
+        #region Métodos Públicos
 
         public void CargarExpedientes(bool aplicarFiltroFechas, DateTime fechaInicio, DateTime fechaFin)
         {
-            // Cargar expedientes de prueba
-            //var expedientes = MockExpedientes.GetExpedientes();
-             var expedientes = _windream.GetExpedientes(aplicarFiltroFechas, fechaInicio, fechaFin);
-
+            var expedientes = _windream.GetExpedientes(aplicarFiltroFechas, fechaInicio, fechaFin);
             Expedientes = expedientes;
             CalcularIsOrphan();
             FiltrarExpedientes();
+        }
+
+        #endregion
+
+        #region Métodos Privados
+
+        private void SetMetadata()
+        {
+            try
+            {
+                _windream.AsignarMetadatosAExpedientes(EditExpediente!, Seleccionados);
+                EditMetadataMode = false;
+                // Reseteamos la selección
+                Seleccionados.Clear();
+                // Actualizamos la lista de expedientes
+                Actualizar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al asignar metadatos: " + ex.Message, "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CalcularIsOrphan()
@@ -178,12 +264,10 @@ namespace GestorExpedientesWpf.ViewModels
 
             foreach (var grupo in expedientesPorAutorizacion)
             {
-                // Usamos HashSet para evitar recorrer varias veces la colección.
                 bool tieneAutorizacion = false;
                 bool tieneFactura = false;
                 bool tieneInforme = false;
 
-                // Recorremos el grupo una sola vez para verificar la presencia de los documentos.
                 foreach (var expediente in grupo)
                 {
                     if (!tieneAutorizacion && expediente.TipoDoc == "Autorización")
@@ -193,12 +277,10 @@ namespace GestorExpedientesWpf.ViewModels
                     if (!tieneInforme && expediente.TipoDoc == "Informe")
                         tieneInforme = true;
 
-                    // Si ya tenemos los tres, podemos romper el bucle
                     if (tieneAutorizacion && tieneFactura && tieneInforme)
                         break;
                 }
 
-                // Ahora asignamos IsOrphan para cada expediente en el grupo
                 bool isOrphan = !(tieneAutorizacion && tieneFactura && tieneInforme);
                 foreach (var expediente in grupo)
                 {
@@ -206,7 +288,6 @@ namespace GestorExpedientesWpf.ViewModels
                 }
             }
         }
-
 
         private void FiltrarExpedientes()
         {
@@ -222,52 +303,97 @@ namespace GestorExpedientesWpf.ViewModels
             };
 
             ExpedientesView = collectionView;
-            // Notificar cambios en los contadores
             OnPropertyChanged(nameof(TotalDocumentos));
             OnPropertyChanged(nameof(AutorizacionesCount));
             OnPropertyChanged(nameof(FacturasCount));
             OnPropertyChanged(nameof(InformesCount));
         }
 
-        public ICommand ActualizarCommand
+        private void AsignarMetadatos()
         {
-            get
+            if (AsegurarTriplete)
             {
-                if (_actualizarCommand == null)
+                bool tieneAutorizacion = Seleccionados.Any(e => e.TipoDoc == "Autorización");
+                bool tieneFactura = Seleccionados.Any(e => e.TipoDoc == "Factura");
+                bool tieneInforme = Seleccionados.Any(e => e.TipoDoc == "Informe");
+
+                if (!tieneAutorizacion || !tieneFactura || !tieneInforme)
                 {
-                    _actualizarCommand = new RelayCommand(param => this.Actualizar(), null);
+                    MessageBox.Show("Debe haber al menos una autorización, una factura y un informe en la selección.", "Gestión Expedientes",
+                         MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return;
                 }
-                return _actualizarCommand;
             }
+            else if (!Seleccionados.Any())
+            {
+                MessageBox.Show("Debe haber al menos un registro en la selección.", "Gestión Expedientes",
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            // Tenemos que poner en los controles del modo de edición los valores que corresponda
+            // Crear EditExpediente incluso si no hay una factura en la selección
+            EditExpediente = new Expediente();
+
+            // Asignar EditExpediente basado en la factura seleccionada si existe
+            var factura = Seleccionados.FirstOrDefault(e => e.TipoDoc == "Factura");
+            if (factura != null)
+            {
+                EditExpediente.DocID = factura.DocID;
+                EditExpediente.RutaWindream = factura.RutaWindream;
+                EditExpediente.NoAutorizacion = factura.NoAutorizacion;
+                EditExpediente.FechaCreacion = factura.FechaCreacion;
+                EditExpediente.Cobertura = factura.Cobertura;
+                EditExpediente.NIFMutua = factura.NIFMutua;
+                EditExpediente.NombrePaciente = factura.NombrePaciente;
+                EditExpediente.DNIPaciente = factura.DNIPaciente;
+                EditExpediente.FechaFactura = factura.FechaFactura;
+                EditExpediente.NoFactura = factura.NoFactura;
+                EditExpediente.Remesa = factura.Remesa;
+                EditExpediente.CoberturaInforme = factura.CoberturaInforme;
+                EditExpediente.TipoDoc = factura.TipoDoc;
+                EditExpediente.IsOrphan = factura.IsOrphan;
+            }
+
+            // Rellenar campos vacíos con datos del primer expediente seleccionado que tenga algún valor para ese campo específico
+            foreach (var expediente in Seleccionados)
+            {
+                if (string.IsNullOrEmpty(EditExpediente.RutaWindream))
+                    EditExpediente.RutaWindream = expediente.RutaWindream;
+                if (string.IsNullOrEmpty(EditExpediente.NoAutorizacion))
+                    EditExpediente.NoAutorizacion = expediente.NoAutorizacion;
+                if (string.IsNullOrEmpty(EditExpediente.Cobertura))
+                    EditExpediente.Cobertura = expediente.Cobertura;
+                if (string.IsNullOrEmpty(EditExpediente.NIFMutua))
+                    EditExpediente.NIFMutua = expediente.NIFMutua;
+                if (string.IsNullOrEmpty(EditExpediente.NombrePaciente))
+                    EditExpediente.NombrePaciente = expediente.NombrePaciente;
+                if (string.IsNullOrEmpty(EditExpediente.DNIPaciente))
+                    EditExpediente.DNIPaciente = expediente.DNIPaciente;
+                if (string.IsNullOrEmpty(EditExpediente.NoFactura))
+                    EditExpediente.NoFactura = expediente.NoFactura;
+                if (string.IsNullOrEmpty(EditExpediente.Remesa))
+                    EditExpediente.Remesa = expediente.Remesa;
+                if (string.IsNullOrEmpty(EditExpediente.CoberturaInforme))
+                    EditExpediente.CoberturaInforme = expediente.CoberturaInforme;
+            }
+
+            // Entramos en modo edición de metadatos
+            EditMetadataMode = true;            
         }
 
-        public ICommand AddSeleccionCommand
+        private async void Actualizar()
         {
-            get
-            {
-                if (_addSeleccionCommand == null)
-                {
-                    _addSeleccionCommand = new RelayCommand<Expediente>(AgregarSeleccionado);
-                }
-                return _addSeleccionCommand;
-            }
-        }
+            IsBusy = true;
 
-        public ICommand RemoveSeleccionCommand
-        {
-            get
+            try
             {
-                if (_removeSeleccionCommand == null)
-                {
-                    _removeSeleccionCommand = new RelayCommand<Expediente>(QuitarSeleccionado);
-                }
-                return _removeSeleccionCommand;
+                await Task.Run(() => CargarExpedientes(AplicarFiltroFechas, FechaInicio, FechaFin));
             }
-        }
-
-        private void Actualizar()
-        {
-            CargarExpedientes(AplicarFiltroFechas, FechaInicio, FechaFin);
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private void AgregarSeleccionado(Expediente expediente)
@@ -286,10 +412,16 @@ namespace GestorExpedientesWpf.ViewModels
             }
         }
 
+        #endregion
+
+        #region INotifyPropertyChanged Implementation
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        #endregion
     }
 }

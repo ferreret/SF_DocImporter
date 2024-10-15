@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:GestorExpedientesWpf"        
         xmlns:viewModel="clr-namespace:GestorExpedientesWpf.ViewModels"     
         xmlns:converters="clr-namespace:GestorExpedientesWpf.Converters"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Gestión de expedientes" MinHeight="800" MinWidth="1200"
         Background="#f0f2f5" FontFamily="Segoe UI">
@@ -52,95 +53,201 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="FormTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+
+        <converters:BooleanToContentConverter x:Key="BooleanToContentConverter">
+            <!-- ZONA DE MODO DE EDICION -->
+            <converters:BooleanToContentConverter.TrueContent>
+                <Grid>
+                    <GroupBox  Margin="0,0,10,10" Background="#ecf0f1" BorderBrush="#bdc3c7">
+                        <GroupBox.Header>
+                            <TextBlock Text="Edición de metadatos" Style="{StaticResource SectionTitle}"/>
+                        </GroupBox.Header>
+                        <!-- Controles para editar datos -->
+                        <Grid Margin="10">
+                            <Border BorderBrush="#bdc3c7" BorderThickness="2" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                <Grid Margin="5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="NoAutorizacion:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}" />
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}" 
+                                             Text="{Binding EditExpediente.NoAutorizacion}"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Cobertura:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Width="400" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.Cobertura}"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="NIFMutua:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.NIFMutua}"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Nombre Paciente:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Width="400" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.NombrePaciente}"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="DNI Paciente:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.DNIPaciente}"/>
+
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Fecha Factura:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <DatePicker Grid.Row="5" Grid.Column="1" Margin="5" Width="200" HorizontalAlignment="Left" FontSize="16"
+                                             SelectedDate="{Binding EditExpediente.FechaFactura}"/>
+
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="No Factura:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="6" Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.NoFactura}"/>
+
+                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Remesa:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="7" Grid.Column="1" Margin="5" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.Remesa}"/>
+
+                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Cobertura Informe:" Margin="5" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="8" Grid.Column="1" Margin="5" Width="400" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.CoberturaInforme}"/>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="9" Grid.Column="1">
+                                        <Button Content="Asignar" Command="{Binding SetMetadataCommand}" Background="#3498db" Foreground="White" Margin="5" Padding="5" FontSize="16" />
+                                        <Button Content="Cancelar" Command="{Binding CancelEditMetadataCommand}" Background="#3498db" Foreground="White" Margin="5" Padding="5" FontSize="16" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </converters:BooleanToContentConverter.TrueContent>
+
+            <converters:BooleanToContentConverter.FalseContent>
+                <!--ZONA DE FILTROS Y RESULTADOS-->
+                <Grid>
+
+                    <Grid.RowDefinitions >
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <GroupBox Header="Selección de documentos" Margin="0,0,10,10" Background="#ecf0f1" BorderBrush="#bdc3c7" Grid.Row="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                                <CheckBox Content="Aplicar filtro de fechas" Margin="0,5,0,0" Name="chkFechaFiltro" IsChecked="{Binding AplicarFiltroFechas}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaInicio}"/>
+                                    <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaFin}"/>
+                                    <Button Content="Actualizar" Margin="10,0,0,0" Width="100" Command="{Binding ActualizarCommand}" Background="#3498db" Foreground="White"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                                    <CheckBox Content="Mostrar solo documentos huérfanos" IsChecked="{Binding MostrarSoloDocumentosHuerfanos}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <CheckBox Content="Ignorar documentos con remesa" IsChecked="{Binding IgnorarDocumentosConRemesa}" Margin="0,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="10,0,10,0" VerticalAlignment="Center">
+                                <Border BorderBrush="#bdc3c7" BorderThickness="1" Background="#ecf0f1" Padding="10" CornerRadius="5">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{Binding TotalDocumentos, StringFormat='Total expedientes: {0}'}" Style="{StaticResource CountTextStyle}" HorizontalAlignment="Center"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                            <TextBlock Text="{Binding AutorizacionesCount, StringFormat='Autorizaciones: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
+                                            <TextBlock Text="{Binding InformesCount, StringFormat='Informes: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
+                                            <TextBlock Text="{Binding FacturasCount, StringFormat='Facturas: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </GroupBox>
+
+                    <Grid Grid.Row="1" Margin="0,0,10,10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Resultado consulta" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
+
+                        <xctk:BusyIndicator IsBusy="{Binding IsBusy}" BusyContent="Actualizando..." Grid.Row="1">
+                            <DataGrid Margin="0,0,0,0" AutoGenerateColumns="False" ItemsSource="{Binding ExpedientesView}" 
+      IsReadOnly="True" RowStyle="{StaticResource OrphanRowStyle}" 
+      MouseDoubleClick="ResultadosDataGrid_MouseDoubleClick"
+      SelectedItem="{Binding SelectedExpediente}"
+      >
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
+                                    <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
+                                    <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}"/>
+                                    <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
+                                    <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
+                                    <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
+                                    <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
+                                    <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}"/>
+                                    <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
+                                    <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
+                                    <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
+                                    <DataGridTemplateColumn Header="Añadir">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Command="{Binding DataContext.AddSeleccionCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Background="#2ecc71" Foreground="White">
+                                                    <Image Source="pack://application:,,,/GestorExpedientesWpf;component/Resources/add.png" Width="16" Height="16"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </xctk:BusyIndicator>
+                    </Grid>
+
+                </Grid>
+            </converters:BooleanToContentConverter.FalseContent>
+        </converters:BooleanToContentConverter>
+
     </Window.Resources>
 
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        
         <GridSplitter Grid.Column="0" Width="10" HorizontalAlignment="Right" Background="#bdc3c7" ToolTip="Ajustar tamaño"/>
 
         <Grid Grid.Column="0" Margin="10">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <!--<RowDefinition Height="*"/>-->
             </Grid.RowDefinitions>
 
-            <GroupBox Header="Selección de documentos" Margin="0,0,10,10" Background="#ecf0f1" BorderBrush="#bdc3c7">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Vertical" Margin="0,10,0,0">
-                        <CheckBox Content="Aplicar filtro de fechas" Margin="0,5,0,0" Name="chkFechaFiltro" IsChecked="{Binding AplicarFiltroFechas}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaInicio}"/>
-                            <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaFin}"/>
-                            <Button Content="Actualizar" Margin="10,0,0,0" Width="100" Command="{Binding ActualizarCommand}" Background="#3498db" Foreground="White"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <CheckBox Content="Mostrar solo documentos huérfanos" IsChecked="{Binding MostrarSoloDocumentosHuerfanos}" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                            <CheckBox Content="Ignorar documentos con remesa" IsChecked="{Binding IgnorarDocumentosConRemesa}" Margin="0,0,0,0" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical" Margin="10,0,10,0" VerticalAlignment="Center">
-                        <Border BorderBrush="#bdc3c7" BorderThickness="1" Background="#ecf0f1" Padding="10" CornerRadius="5">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="{Binding TotalDocumentos, StringFormat='Total expedientes: {0}'}" Style="{StaticResource CountTextStyle}" HorizontalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
-                                    <TextBlock Text="{Binding AutorizacionesCount, StringFormat='Autorizaciones: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
-                                    <TextBlock Text="{Binding InformesCount, StringFormat='Informes: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
-                                    <TextBlock Text="{Binding FacturasCount, StringFormat='Facturas: {0}'}" Style="{StaticResource CountTextStyle}" Margin="5,0"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
+            <!-- SELECCION, RESULTADOS  ZONA DE MODO DE EDICION-->
+            <ContentControl Grid.Row="0" Content="{Binding EditMetadataMode, Converter={StaticResource BooleanToContentConverter}}" />
 
-            <Grid Grid.Row="2" Margin="0,0,10,10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Text="Resultado consulta" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
-                <DataGrid Margin="0,0,0,0" AutoGenerateColumns="False" ItemsSource="{Binding ExpedientesView}" 
-                          Grid.Row="1" IsReadOnly="True" RowStyle="{StaticResource OrphanRowStyle}" 
-                          MouseDoubleClick="ResultadosDataGrid_MouseDoubleClick"
-                          SelectedItem="{Binding SelectedExpediente}"
-                          >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
-                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
-                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion}"/>
-                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
-                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
-                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
-                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura}"/>
-                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
-                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
-                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
-                        <DataGridTemplateColumn Header="Añadir">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding DataContext.AddSeleccionCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Background="#2ecc71" Foreground="White">
-                                        <Image Source="pack://application:,,,/GestorExpedientesWpf;component/Resources/add.png" Width="16" Height="16"/>
-                                    </Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
+            <!--GRID DE EXPEDIENTES SELECCIONADOS-->
+            <Grid Grid.Row="1" Margin="0,0,10,10">
 
-            <Grid Grid.Row="3" Margin="0,0,10,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -148,19 +255,18 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="Selección" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
-
                 <DataGrid AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Seleccionados}" Grid.Row="1"
                           RowStyle="{StaticResource OrphanRowStyle}" MouseDoubleClick="SeleccionadosDataGrid_MouseDoubleClick"
                           SelectedItem="{Binding SelectedExpediente}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
                         <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
-                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion}"/>
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}"/>
                         <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
                         <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
                         <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
                         <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura}"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}"/>
                         <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
                         <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
                         <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
@@ -176,17 +282,20 @@
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Margin="0,10,0,0">
-                    <CheckBox Content="Asegurar triplete" IsChecked="True" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <Button Content="Asignar metadatos" Width="150" Background="#3498db" Foreground="White"/>
+                    <CheckBox Content="Asegurar triplete" IsChecked="{Binding AsegurarTriplete}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button Content="Asignar metadatos" Width="150" Background="#3498db" Foreground="White" 
+                            Command="{Binding AsignarMetadatosCommand}"/>
                 </StackPanel>
+                
             </Grid>
         </Grid>
 
+        <!--SEGUNDA COLUMNA - VISOR PDF-->
         <TabControl Grid.Column="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <TabItem Header="Visor de Documento">
-                <wv2:WebView2 Source="{Binding SelectedExpedienteUrl, Converter={StaticResource NullToDefaultUrlConverter }}" />
+                <wv2:WebView2 Source="{Binding SelectedExpedienteUrl, Converter={StaticResource NullToDefaultUrlConverter}}"/>
             </TabItem>
-            <TabItem Header="Propiedades del Documento">
+            <!--<TabItem Header="Propiedades del Documento">
                 <StackPanel Margin="10">
                     <TextBlock Text="Propiedades del documento" Style="{StaticResource SectionTitle}"/>
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
@@ -203,7 +312,9 @@
                     </StackPanel>
                     <Button Content="Guardar cambios" Margin="0,10,0,0" HorizontalAlignment="Right" Width="150" Background="#3498db" Foreground="White"/>
                 </StackPanel>
-            </TabItem>
+            </TabItem>-->
         </TabControl>
+        
     </Grid>
+    
 </Window>
