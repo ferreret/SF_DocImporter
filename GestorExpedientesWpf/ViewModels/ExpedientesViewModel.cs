@@ -1,5 +1,6 @@
 ﻿using GestorExpedientesWpf.Command;
 using GestorExpedientesWpf.Models;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -316,6 +317,16 @@ namespace GestorExpedientesWpf.ViewModels
             if (Seleccionados == null || !Seleccionados.Any())
             {
                 MessageBox.Show("Debe seleccionar al menos un expediente para eliminar.", "Gestión Expedientes",
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            // Mostramos un input box que tengan que poner ELIMINAR para poder continuar con la eliminación
+            string eliminar = Interaction.InputBox("Escriba `ELIMINAR` para confirmar la eliminación de los expedientes seleccionados.", "Gestión Expedientes", string.Empty);
+
+            if (eliminar != "ELIMINAR")
+            {
+                MessageBox.Show("Operación cancelada.", "Gestión Expedientes",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
