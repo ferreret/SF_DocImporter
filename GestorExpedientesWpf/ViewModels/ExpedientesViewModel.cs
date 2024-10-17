@@ -30,6 +30,7 @@ namespace GestorExpedientesWpf.ViewModels
         private ICommand _addSeleccionCommand;
         private ICommand _removeSeleccionCommand;
         private ICommand _asignarMetadatosCommand;
+        private ICommand _eliminarSeleccionCommand;
         private ICommand _showEditMetadataCommand;
         private ICommand _cancelEditMetadataCommand;
         private ICommand _setMetadataCommand;    
@@ -201,6 +202,7 @@ namespace GestorExpedientesWpf.ViewModels
         public ICommand AddSeleccionCommand => _addSeleccionCommand ??= new RelayCommand<Expediente>(AgregarSeleccionado);
         public ICommand RemoveSeleccionCommand => _removeSeleccionCommand ??= new RelayCommand<Expediente>(QuitarSeleccionado);
         public ICommand AsignarMetadatosCommand => _asignarMetadatosCommand ??= new RelayCommand(param => AsignarMetadatos(), null);
+        public ICommand EliminarSeleccionCommand => _eliminarSeleccionCommand ??= new RelayCommand(param => EliminarSeleccion(), null);
         public ICommand ShowEditMetadataCommand => _showEditMetadataCommand ??= new RelayCommand(param => EditMetadataMode = true, null);
         public ICommand CancelEditMetadataCommand => _cancelEditMetadataCommand ??= new RelayCommand(param => EditMetadataMode = false, null);
         public ICommand SetMetadataCommand => _setMetadataCommand ??= new RelayCommand(param => SetMetadata(), null);
@@ -307,6 +309,31 @@ namespace GestorExpedientesWpf.ViewModels
             OnPropertyChanged(nameof(AutorizacionesCount));
             OnPropertyChanged(nameof(FacturasCount));
             OnPropertyChanged(nameof(InformesCount));
+        }
+
+        private void EliminarSeleccion()
+        {
+            if (Seleccionados == null || !Seleccionados.Any())
+            {
+                MessageBox.Show("Debe seleccionar al menos un expediente para eliminar.", "Gestión Expedientes",
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            try
+            {
+                _windream.EliminarExpedientes(Seleccionados);
+                Seleccionados.Clear();
+            }
+            catch
+            {
+                MessageBox.Show("Error al eliminar expedientes.", "Gestión Expedientes",
+                                 MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {                
+                Actualizar();
+            }
         }
 
         private void AsignarMetadatos()

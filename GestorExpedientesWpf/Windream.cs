@@ -243,7 +243,7 @@ namespace GestorExpedientesWpf
                     document.SetVariableValue("NoFactura", editExpediente.NoFactura);
                     document.SetVariableValue("Remesa", editExpediente.Remesa);
                     document.SetVariableValue("CoberturaInforme", editExpediente.CoberturaInforme);
-
+                    
                     document.Save();
                     document.unlock();
                 }
@@ -254,12 +254,61 @@ namespace GestorExpedientesWpf
             }
         }
 
+        public void EliminarExpedientes(ObservableCollection<Expediente> lista)
+        {
+            // Implementación de la función que asigna metadatos
+            if (!Login2Windream())
+            {
+                throw new InvalidOperationException("No se pudo conectar a Windream.");
+            }
+
+            foreach (Expediente expediente in lista)
+            {
+                try
+                {
+                    
+                    WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, expediente.DocID);
+                                        
+                    foreach (WMObject version in document.aVersions)
+                    {
+                        if (!PrepareDocumentForDelete(version))
+                        {
+                            MessageBox.Show($"No se pudo bloquear el documento {document.aName} para eliminar.", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+                            continue;
+                        }
+                        IWMObject6 doc = (IWMObject6)version;
+                        doc.DeleteEx((int)WMDeleteFlags.WMDeleteFlags_Default);
+                    }                                  
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private bool PrepareDocumentForDelete(WMObject document)
+        {
+            if (!document.IsEditableFor((int)WMObjectEditMode.WMObjectEditModeDelete))
+            {
+                return false;
+            }
+
+            if (!document.LockFor((int)WMObjectEditMode.WMObjectEditModeDelete))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private bool PrepareDocumentForEditing(WMObject document)
         {
             if (!document.IsEditableFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
             {                
                 return false;
             }
+            
 
             if (!document.LockFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
             {             

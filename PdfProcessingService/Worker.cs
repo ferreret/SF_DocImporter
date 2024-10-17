@@ -9,6 +9,7 @@ using LibUtil;
 using LibUtil.Models;
 using LibDataExtractor;
 using LibWin;
+using System.Runtime.InteropServices;
 
 namespace PdfProcessingService
 {
@@ -96,7 +97,14 @@ namespace PdfProcessingService
 
         private void ProcessFolders(ServiceConfig config)
         {
-            foreach (var (inputFolder, outputFolder, errorFolder) in config.Folders!)
+            var folders = new List<(string, string, string, TipoDocumento)>
+            {
+                (config.AutorizacionesFolder!, config.AutorizacionesProcessedFolder!, config.AutorizacionesIncidenciasFolder!, TipoDocumento.Autorización),
+                (config.FacturasFolder!, config.FacturasProcessedFolder!, config.FacturasIncidenciasFolder!, TipoDocumento.Factura),
+                (config.InformesFolder!, config.InformesProcessedFolder!, config.InformesIncidenciasFolder!, TipoDocumento.Informe)
+            };
+
+            foreach (var (inputFolder, outputFolder, errorFolder, tipoDoc) in folders!)
             {
                 _fileLogger!.LogInformation($"Procesando archivos en la carpeta: {inputFolder}");
 
@@ -105,7 +113,7 @@ namespace PdfProcessingService
                 foreach (var file in files)
                 {
                     _totalFilesProcessed++; // Increment the total files processed count
-                    ProcessFile(file, outputFolder, errorFolder, config);
+                    ProcessFile(file, outputFolder, errorFolder, tipoDoc, config);
                 }
             }
 
@@ -113,7 +121,7 @@ namespace PdfProcessingService
             _fileLogger.LogInformation("###############################################################################################");
         }
 
-        private void ProcessFile(string file, string outputFolder, string errorFolder, ServiceConfig config)
+        private void ProcessFile(string file, string outputFolder, string errorFolder, TipoDocumento tipoDoc, ServiceConfig config)
         {
             if (!CheckTimeFile(file, config.DelaySeconds))
             {
@@ -121,12 +129,12 @@ namespace PdfProcessingService
                 return;
             }
 
-            _fileLogger!.LogInformation($"Procesando archivo PDF: {file}");
+            _fileLogger!.LogInformation($"Procesando archivo PDF {tipoDoc.ToString()}: {file}");
 
             WindreamIndexes metadata;
             try
             {
-                metadata = _extractor.Extract(file, _fileLogger, config);
+                metadata = _extractor.Extract(file, _fileLogger, config, tipoDoc);
                 _fileLogger.LogInformation(metadata.ToString());
             }
             catch (Exception ex)
@@ -137,11 +145,11 @@ namespace PdfProcessingService
                 return;
             }
 
-            bool fileImported = ImportFile(file, metadata, config);
+            string fileImported = ImportFile(file, metadata, config);
 
-            if (fileImported)
+            if (!string.IsNullOrEmpty(fileImported))
             {
-                MoveProcessedFile(file, outputFolder);
+                MoveProcessedFile(file, outputFolder, fileImported);
                 _totalFilesSucceeded++; // Increment the succeeded files count
 
                 // We write to the console in green that the file has been processed
@@ -157,7 +165,7 @@ namespace PdfProcessingService
             }
         }
 
-        private bool ImportFile(string file, WindreamIndexes metadata, ServiceConfig config)
+        private string ImportFile(string file, WindreamIndexes metadata, ServiceConfig config)
         {
             try
             {
@@ -166,19 +174,26 @@ namespace PdfProcessingService
             catch (Exception ex)
             {
                 _fileLogger!.LogError($"Error al importar el archivo {file} a Windream: {ex.Message}");
-                return false;
+                return "";
             }
         }
 
-        private void MoveProcessedFile(string file, string outputFolder)
+        private void MoveProcessedFile(string file, string outputFolder, string importedFileName = "")
         {
             string processedFolder = Path.Combine(outputFolder, DateTime.Now.Year.ToString());
             Directory.CreateDirectory(processedFolder);
 
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+            string fileNameWithoutExtension = "";
+
+            if (string.IsNullOrEmpty(importedFileName))
+                fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+            else
+                fileNameWithoutExtension = importedFileName.Substring(0, importedFileName.Length - 4);
+
             string extension = Path.GetExtension(file);
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string processedFile = Path.Combine(processedFolder, $"{fileNameWithoutExtension}_{timestamp}{extension}");
+            string timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+
+            string processedFile = Path.Combine(processedFolder, $"{fileNameWithoutExtension}-{timestamp}{extension}");
 
             // Comprobar si el archivo ya existe y agregar un contador si es necesario
             int counter = 1;

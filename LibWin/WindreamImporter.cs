@@ -35,7 +35,7 @@ namespace LibWin
         /// <param name="fileLogger">El objeto FileLogger utilizado para registrar mensajes de log.</param>
         /// <param name="serviceConfig">La configuración del servicio.</param>
         /// <returns>True si la importación fue exitosa, False en caso contrario.</returns>
-        public bool Import(string pathPdf, WindreamIndexes windreamIndexes, FileLogger fileLogger, ServiceConfig serviceConfig)
+        public string Import(string pathPdf, WindreamIndexes windreamIndexes, FileLogger fileLogger, ServiceConfig serviceConfig)
         {
 
             _fileLogger = fileLogger;
@@ -45,21 +45,21 @@ namespace LibWin
             if (!Login2Windream())
             {
                 _fileLogger.LogError("Error al conectar con Windream");
-                return false;
+                return "";
             }
 
             // Recuperamos el object type 
             if (string.IsNullOrEmpty(_serviceConfig.ObjectType))
             {
                 _fileLogger.LogError("El tipo de objeto no está configurado.");
-                return false;
+                return "";
             }
 
             WMObject? oObjectType = GetDocumentType(_serviceConfig.ObjectType);
             if (oObjectType == null)
             {
                 _fileLogger.LogError("No se ha encontrado el tipo de documento en Windream");
-                return false;
+                return "";
             }
 
             // Dependiendo del tipo de documento, la operativa será diferente
@@ -69,36 +69,31 @@ namespace LibWin
                 if (String.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
                 {
                     _fileLogger.LogError("No se ha especificado el número de autorización.");
-                    return false;
+                    return "";
                 }
                 return importNoFactura(pathPdf, windreamIndexes, oObjectType);
             }
             else if (windreamIndexes.TipoDoc == TipoDocumento.Factura)
             {
                 // Si no tenemos el número de factura, no podemos trabajar con el documento
-                if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || string.IsNullOrEmpty(windreamIndexes.NoAutorizacion) || !ValidateMutua(windreamIndexes.Cobertura, _serviceConfig.PathMutuas!))
+                if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || !ValidateMutua(windreamIndexes.Cobertura, _serviceConfig.PathMutuas!))
                 {
                     _fileLogger.LogError("Faltan datos claves en la Factura. Factura/Autorización/");
-                    return false;
+                    return "";
                 }
                 return importFactura(pathPdf, windreamIndexes, oObjectType);
             }
             else if (windreamIndexes.TipoDoc == TipoDocumento.Informe)
             {
-                // Si no tenemos el número de autorización, no podemos trabajar con el documento
-                if (String.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
-                {
-                    _fileLogger.LogError("No se ha especificado el número de autorización.");
-                    return false;
-                }
+                // Para el informe, no hay ningún filtro ya que el número de autorización puede existir o no, pero no es necesario ya que 
+                // en el momento de guardar el documento se puede NO disponer
                 return importNoFactura(pathPdf, windreamIndexes, oObjectType, true);
             }
             else
             {
                 _fileLogger.LogError("Tipo de documento no soportado.");
-                return false;
+                return "";
             }
-
         }
 
         // -------------------------------------------------------------------------------------------------------
@@ -152,7 +147,7 @@ namespace LibWin
 
 
         // -------------------------------------------------------------------------------------------------------
-        private bool importFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType)
+        private string importFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType)
         {
             var searchTerms = BuildSearchTermsFactura(windreamIndexes);
             var listaDocumentos = BuscarDocumentos(objectType, searchTerms);
@@ -163,7 +158,7 @@ namespace LibWin
             if (wmSession2 == null)
             {
                 _fileLogger.LogError("No se pudo obtener la sesión de Windream.");
-                return false;
+                return "";
             }
 
             // Desactivar el evento de indexación
@@ -184,19 +179,19 @@ namespace LibWin
 
             if (!PrepareDocumentForEditing(document))
             {
-                return false;
+                return "";
             }
 
             bool uploadFactura = UploadPdfToWindream(pathPdf, windreamIndexes, objectType, document, isNewDocument);
 
             if (!uploadFactura)
             {
-                return false;
+                return "";
             }
 
             UpdateDocsNoFactura(windreamIndexes, objectType);
 
-            return true;
+            return document.aName;
         }
 
         // --------------------------------------------------------------------------------------------------------------------------------------
@@ -323,11 +318,17 @@ namespace LibWin
 
             string matchingFileName;
             if (windreamIndexes.TipoDoc == TipoDocumento.Factura)
-                matchingFileName = windreamIndexes.NoAutorizacion! + "F.pdf";
+                matchingFileName = windreamIndexes.NoFactura! + "-F.pdf";
             else if (windreamIndexes.TipoDoc == TipoDocumento.Autorización)
-                matchingFileName = windreamIndexes.NoAutorizacion! + "A.pdf";
+                matchingFileName = windreamIndexes.NoAutorizacion! + "-A.pdf";
             else
-                matchingFileName = windreamIndexes.NoAutorizacion! + "-" + Common.GenerateUniqueIdentifier() + "-" + "I.pdf";
+            {
+                if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+                    matchingFileName = Common.GenerateUniqueIdentifier() + "-" + "I.pdf";
+                else
+                    matchingFileName = windreamIndexes.NoAutorizacion! + "-" + Common.GenerateUniqueIdentifier() + "-" + "I.pdf";
+            }
+                
 
             // string matchingFileName = windreamIndexes.NoAutorizacion! + "F.pdf";
             string documentPath = Path.Combine(targetFolder, matchingFileName);
@@ -580,7 +581,7 @@ namespace LibWin
         }
 
         // -------------------------------------------------------------------------------------------------------
-        private bool importNoFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType, bool alwaysCreate = false)
+        private string importNoFactura(string pathPdf, WindreamIndexes windreamIndexes, WMObject objectType, bool alwaysCreate = false)
         {
             // Solo tengo el número de autorización
             // Busco si hay algún documento con el mismo número de autorización
@@ -593,7 +594,7 @@ namespace LibWin
             if (wmSession2 == null)
             {
                 _fileLogger.LogError("No se pudo obtener la sesión de Windream.");
-                return false;
+                return "";
             }
 
             // Desactivar el evento de indexación
@@ -614,14 +615,14 @@ namespace LibWin
 
             if (!PrepareDocumentForEditing(document))
             {
-                return false;
+                return "";
             }
 
             bool uploadAutorizacion = UploadPdfToWindream(pathPdf, windreamIndexes, objectType, document, isNewDocument);
 
             if (!uploadAutorizacion)
             {
-                return false;
+                return "";
             }
 
             // Busco la factura con el mismo número de autorización, para actualizar indices
@@ -637,7 +638,7 @@ namespace LibWin
                 }
             }
 
-            return true;
+            return document.aName;
         }
 
         // -------------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ using LibUtil.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Vintasoft.Imaging;
@@ -32,30 +33,25 @@ namespace LibDataExtractor
             Vintasoft.Imaging.Drawing.SkiaSharp.SkiaSharpDrawingFactory.SetAsDefault();
         }
 
-        public WindreamIndexes Extract(string pathPdf, FileLogger fileLogger, ServiceConfig serviceConfig)
+        public WindreamIndexes Extract(string pathPdf, FileLogger fileLogger, ServiceConfig serviceConfig, TipoDocumento tipoDoc)
         {
             _fileLogger = fileLogger;
             _serviceConfig = serviceConfig;
 
             WindreamIndexes windreamIndexes = new();
-
-            // Extraer los metadatos del PDF
-
-            // Miro el último caracter del nombre del archivo menos la extensión
-            string lastChar = ObtenerUltimoCaracterSinExtension(pathPdf).ToString();
-
+            
             // Si es A es una autorización
             // Si es F es una factura
             // Si es I es un informe
-            if (lastChar == "A")
+            if (tipoDoc == TipoDocumento.Autorización)
             {
                 ProcessAutorizacion(pathPdf, windreamIndexes);
             }
-            else if (lastChar == "F")
+            else if (tipoDoc == TipoDocumento.Factura)
             {
                 ProcessFactura(pathPdf, windreamIndexes);
             }
-            else if (lastChar == "I")
+            else if (tipoDoc == TipoDocumento.Informe)
             {
                 ProcessInforme(pathPdf, windreamIndexes);
             }
@@ -72,8 +68,15 @@ namespace LibDataExtractor
             // Extraer los metadatos de una autorización
 
             // En el caso de la autorización, el número de autorización es el nombre del archivo menos
-            // la  última letra (A) y la extensión
-            windreamIndexes.NoAutorizacion = Path.GetFileNameWithoutExtension(pathPdf).Remove(Path.GetFileNameWithoutExtension(pathPdf).Length - 1);
+            // guión, la letra (A) y la extensión
+            if (pathPdf.ToUpper().EndsWith("-A.PDF"))
+            {
+                windreamIndexes.NoAutorizacion = Path.GetFileNameWithoutExtension(pathPdf).Remove(Path.GetFileNameWithoutExtension(pathPdf).Length - 2);                
+            }
+            else
+            {
+                windreamIndexes.NoAutorizacion = "";
+            }
             windreamIndexes.TipoDoc = TipoDocumento.Autorización;
         }
 
@@ -81,6 +84,8 @@ namespace LibDataExtractor
         {
             // Extraer los metadatos de una factura
             Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, _serviceConfig.PathTemplateFactura! , _fileLogger);
+
+            windreamIndexes.TipoDoc = TipoDocumento.Factura;
 
             // Si la factura no es nula, mapeamos los datos a los índices de Windream
             if (factura != null)
@@ -90,22 +95,27 @@ namespace LibDataExtractor
                 windreamIndexes.DNIPaciente = factura.DNIPaciente is null ? String.Empty : factura.DNIPaciente.RemoveCarriageReturns();
                 windreamIndexes.NombrePaciente = factura.NombrePaciente is null ? String.Empty : factura.NombrePaciente.RemoveCarriageReturns();
                 windreamIndexes.NIFMutua = factura.CIFMutua is null ? String.Empty : factura.CIFMutua.RemoveCarriageReturns();
-                windreamIndexes.Cobertura = factura.Mutua is null ? String.Empty : factura.Mutua.RemoveCarriageReturns();
-                windreamIndexes.TipoDoc = TipoDocumento.Factura;
+                windreamIndexes.Cobertura = factura.Mutua is null ? String.Empty : factura.Mutua.RemoveCarriageReturns();                
 
-                // factura.FechaFactura es un string con formato "dd/MM/yyyy", lo parseo a fecha
-                if (factura != null)
+                if (DateTime.TryParse(factura.FechaFactura, out DateTime fechaFactura))
                 {
-                    if (DateTime.TryParse(factura.FechaFactura, out DateTime fechaFactura))
-                    {
-                        windreamIndexes.FechaFactura = fechaFactura;
-                    }
-                    else
-                    {
-                        _fileLogger.LogError("Error al parsear la fecha de la factura.");
-                    }
+                     windreamIndexes.FechaFactura = fechaFactura;
                 }
+                else
+                {
+                   _fileLogger.LogError("Error al parsear la fecha de la factura.");
+                }
+            }
 
+            if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+            {
+                // Si no se ha recuperado el No de Autorización, lo recuperamos del nombre del archivo sin la A final y la extensión
+                // Comprobar previamente que el nombre del archivo acaba con A
+                string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathPdf);
+                if (fileNameWithoutExtension.EndsWith("-A"))
+                {
+                    windreamIndexes.NoAutorizacion = Path.GetFileNameWithoutExtension(pathPdf).Remove(Path.GetFileNameWithoutExtension(pathPdf).Length - 2);
+                }
             }
         }
 
@@ -129,9 +139,14 @@ namespace LibDataExtractor
             if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
             {
                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathPdf);
-                if (fileNameWithoutExtension.EndsWith("I"))
+                if (fileNameWithoutExtension.EndsWith("-A"))
                 {
-                    windreamIndexes.NoAutorizacion = fileNameWithoutExtension.Remove(fileNameWithoutExtension.Length - 1);
+                    windreamIndexes.NoAutorizacion = fileNameWithoutExtension.Remove(fileNameWithoutExtension.Length - 2);
+                }
+                else
+                {
+                    // Ponemos el nombre de archivo en el índice de NombrePaciente
+                    windreamIndexes.NombrePaciente = fileNameWithoutExtension;
                 }
             }
         }
