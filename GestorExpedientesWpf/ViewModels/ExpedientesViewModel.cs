@@ -1,10 +1,12 @@
 ﻿using GestorExpedientesWpf.Command;
 using GestorExpedientesWpf.Models;
+using LibUtil;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -246,6 +248,12 @@ namespace GestorExpedientesWpf.ViewModels
         {
             try
             {
+                if (!ValidaMutua(EditExpediente!.Cobertura))
+                {
+                    MessageBox.Show("La cobertura no es válida. No se encuentra entre los valores válidos.", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                    
                 _windream.AsignarMetadatosAExpedientes(EditExpediente!, Seleccionados);
                 EditMetadataMode = false;
                 // Reseteamos la selección
@@ -257,6 +265,25 @@ namespace GestorExpedientesWpf.ViewModels
             {
                 MessageBox.Show("Error al asignar metadatos: " + ex.Message, "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool ValidaMutua(string cobertura)
+        {
+            var pathIniFile = Path.Combine(GetExecutablePath(), "GestorExpedientesWpf.ini");
+            IniFile iniFile = new IniFile(pathIniFile);
+
+            string? mutuasFile = iniFile.ReadValue("Mutuas", "Path");
+
+            if (string.IsNullOrEmpty(mutuasFile) || !File.Exists(mutuasFile))
+                return false;
+
+            var mutuas = File.ReadAllLines(mutuasFile);
+            return mutuas.Contains(cobertura);
+        }
+
+        public string GetExecutablePath()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
         }
 
         private void CalcularIsOrphan()
