@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibDataExtractor", "LibData
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibWin", "LibWin\LibWin.csproj", "{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorRemesasWpf", "GestorRemesasWpf\GestorRemesasWpf.csproj", "{3194F62E-052A-4EC1-8BAA-2AB475C2F0DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05744665-8A0F-4D5B-9DD8-FB6CB7EA469C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3194F62E-052A-4EC1-8BAA-2AB475C2F0DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3194F62E-052A-4EC1-8BAA-2AB475C2F0DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3194F62E-052A-4EC1-8BAA-2AB475C2F0DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3194F62E-052A-4EC1-8BAA-2AB475C2F0DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

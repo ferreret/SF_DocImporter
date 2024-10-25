@@ -1,0 +1,212 @@
+﻿<Window x:Class="GestorRemesasWpf.MainWindow"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:local="clr-namespace:GestorRemesasWpf"
+       xmlns:vm="clr-namespace:GestorRemesasWpf.ViewModels"
+       xmlns:converters="clr-namespace:GestorRemesasWpf.Converters"
+       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+       mc:Ignorable="d"
+       Title="Gestión de remesas" MinHeight="800" MinWidth="1200"
+       FontFamily="Segoe UI">
+
+    <Window.DataContext>
+        <vm:ExpedienteViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#f8f9fa" />
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#007bff" />
+        <SolidColorBrush x:Key="DangerBrush" Color="#dc3545" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="#28a745" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#ffc107" />
+        <SolidColorBrush x:Key="SplitterBrush" Color="#6c757d" />
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+
+        <!-- Estilo para la columna TipoDoc -->
+        <Style x:Key="TipoDocumentoCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TipoDoc}" Value="Autorización">
+                    <Setter Property="Foreground" Value="#dc3545"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TipoDoc}" Value="Informe">
+                    <Setter Property="Foreground" Value="#007bff"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding TipoDoc}" Value="Factura">
+                    <Setter Property="Foreground" Value="#28a745"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GreenButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Estilo para la columna No Factura -->
+        <Style x:Key="NoFacturaCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsFacturaCargada}" Value="True">
+                    <Setter Property="Background" Value="#28a745" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding EsFacturaOrphan}" Value="True">
+                    <Setter Property="Background" Value="#ffc107" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+
+                <DataTrigger Binding="{Binding EsFacturaInvalida}" Value="True">
+                    <Setter Property="Background" Value="#dc3545" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CodigoRemesaCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsFacturaInvalida}" Value="True">
+                    <Setter Property="Background" Value="#dc3545" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NoAutorizacionCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsFacturaSinAutorizacion}" Value="True">
+                    <Setter Property="Background" Value="#ffc107" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="InformeCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EsFacturaSinInforme}" Value="True">
+                    <Setter Property="Background" Value="#ffc107" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Primera columna -->
+        <Grid Grid.Column="0" Background="{StaticResource BackgroundBrush}">
+            <!-- Contenido de la primera columna -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Primera fila de la primera columna -->
+            <Grid Grid.Row="0" Background="{StaticResource BackgroundBrush}">
+                <GroupBox Header="Selección de fechas" Margin="10" Background="#e9ecef" BorderBrush="#ced4da" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid>
+                        <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                                <CheckBox Content="Aplicar filtro de fechas" Margin="0,5,0,0" Name="chkFechaFiltro" />
+                                <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0"/>
+                                <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0"/>
+                                <Button Content="Actualizar" Margin="10,0,0,0" Width="100" Background="{StaticResource PrimaryBrush}" Foreground="White"/>
+                                <Button Content="Borrar" Margin="10,0,0,0" Width="100" Background="{StaticResource DangerBrush}" Foreground="White" Command="{Binding BorrarExpedientesCommand}"/>
+                            </StackPanel>
+                            <Separator Margin="0,10,0,10"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                                <Label Content="Coberturas:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <ComboBox Name="cmbMutuas" 
+                                       Margin="0,0,0,0" 
+                                       Width="300" 
+                                       IsEditable="True" 
+                                       StaysOpenOnEdit="True" 
+                                       IsTextSearchEnabled="False" 
+                                       ItemsSource="{Binding Expedientes, Converter={StaticResource UniqueCoberturaConverter}}" 
+                                       Text="{Binding FiltroMutua, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                       SelectedItem="{Binding MutuaSeleccionada, Mode=TwoWay}" 
+                                       IsSynchronizedWithCurrentItem="False"
+                                        VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <RadioButton Content="Todos" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.Todos}}" />
+                                    <RadioButton Content="Sin Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.SinRemesa}}" Margin="10,0,0,0"/>
+                                    <RadioButton Content="Con Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.ConRemesa}}" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <CheckBox Content="Mostrar solo huérfanos" 
+                                       IsChecked="{Binding IsOrphanFilter, Mode=TwoWay}" 
+                                       Margin="10,0,0,0" 
+                                       VerticalAlignment="Center" 
+                                       HorizontalAlignment="Left"/>
+                                <CheckBox Content="Mostrar solo facturas" 
+                                       IsChecked="{Binding IsFacturaFilter, Mode=TwoWay}" 
+                                       Margin="10,0,0,0" 
+                                       VerticalAlignment="Center" 
+                                       HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <!-- Nuevo StackPanel para el selector de archivos -->
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                                <Button Content="Seleccionar archivo Facturas" Style="{StaticResource GreenButtonStyle}" Command="{Binding SeleccionarArchivoCommand}" Width="Auto" Margin="0,0,10,0"/>
+                                <TextBlock Text="{Binding NombreArchivo}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{Binding ColorMensajeArchivo}"/>
+                                <CheckBox Content="Mostrar solo Facturas del archivo" 
+                                       IsChecked="{Binding MostrarSoloFacturasDelArchivo, Mode=TwoWay}" 
+                                       Visibility="{Binding NombreArchivo, Converter={StaticResource StringToVisibilityConverter}}" 
+                                       Margin="10,0,0,0" 
+                                       VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+
+            <!-- Segunda fila de la primera columna -->
+            <Grid Grid.Row="1" Background="{StaticResource BackgroundBrush}">
+                <DataGrid ItemsSource="{Binding ExpedientesFiltrados}" AutoGenerateColumns="False" Margin="10" CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}" />
+                        <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" />
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=d}" />
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" CellStyle="{StaticResource NoAutorizacionCellStyle}" />
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=d}" />
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" />
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" />
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" />
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" />
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" CellStyle="{StaticResource CodigoRemesaCellStyle}" />
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" CellStyle="{StaticResource InformeCellStyle}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Grid>
+
+        <!-- Splitter vertical -->
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="{StaticResource SplitterBrush}" />
+
+        <!-- Segunda columna -->
+        <Grid Grid.Column="2" Background="{StaticResource BackgroundBrush}">
+            <!-- Contenido de la segunda columna -->
+        </Grid>
+    </Grid>
+</Window>
