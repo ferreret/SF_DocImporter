@@ -229,6 +229,28 @@ namespace GestorRemesasWpf.Mock
 
             #endregion
 
+            #region "Ejemplo 6, Añado una autorización simple, solo tiene informado el número de autorización"
+            expedientes.Add(new Expediente
+                {                    
+                    FechaCreacion = DateTime.Now.AddDays(-10),             
+                    NoAutorizacion = "6",                 
+                    TipoDoc = "Autorización",
+                    IsOrphan = false
+                });
+            #endregion
+
+            #region "Ejemplo 7, añado un informe, solo tiene informado el nombre del paciente y el DNI"
+            expedientes.Add(new Expediente
+            {
+                NombrePaciente = $"Paciente sin autorización",
+                DNIPaciente = "12345678A",
+                FechaCreacion = DateTime.Now.AddDays(-10),
+                TipoDoc = "Informe",
+                IsOrphan = false
+            });
+            #endregion
+
+
             //var random = new Random(); // Add this line to initialize the random object
 
             //// Crear 4 tripletes de Autorización, Informe y Factura

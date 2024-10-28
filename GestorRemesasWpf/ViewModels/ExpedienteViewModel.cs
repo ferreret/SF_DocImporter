@@ -1,4 +1,5 @@
-﻿using GestorRemesasWpf.Mock;
+﻿using ClosedXML.Excel;
+using GestorRemesasWpf.Mock;
 using GestorRemesasWpf.Models;
 using Microsoft.Win32;
 using System;
@@ -9,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -33,10 +36,14 @@ namespace GestorRemesasWpf.ViewModels
         private Brush _colorMensajeArchivo;
         private bool _isFacturaFilter = true;
         private bool _mostrarSoloFacturasDelArchivo;
+        private DataGrid _dataGrid;
+
+        private Expediente? _selectedExpediente;
 
         public ObservableCollection<Expediente> Expedientes { get; set; }
         public ICollectionView ExpedientesFiltrados { get; set; }
         public List<string> FacturasCargadas { get; set; }
+        private bool _isBusy;
 
         public string MutuaSeleccionada
         {
@@ -45,7 +52,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _mutuaSeleccionada = value;
                 OnPropertyChanged(nameof(MutuaSeleccionada));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
             }
         }
 
@@ -56,7 +63,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _filtroMutua = value;
                 OnPropertyChanged(nameof(FiltroMutua));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
             }
         }
 
@@ -67,7 +74,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _remesaFilter = value;
                 OnPropertyChanged(nameof(RemesaFilter));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
             }
         }
 
@@ -78,7 +85,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _isOrphanFilter = value;
                 OnPropertyChanged(nameof(IsOrphanFilter));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
             }
         }
 
@@ -109,7 +116,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _isFacturaFilter = value;
                 OnPropertyChanged(nameof(IsFacturaFilter));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
             }
         }
 
@@ -120,15 +127,49 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _mostrarSoloFacturasDelArchivo = value;
                 OnPropertyChanged(nameof(MostrarSoloFacturasDelArchivo));
-                FiltrarExpedientes();
+                FiltrarExpedientes(false);
+            }
+        }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged(nameof(IsBusy));
+            }
+        }
+
+        public string SelectedExpedienteUrl => SelectedExpediente?.RutaWindream ?? "about:blank";
+
+        public Expediente? SelectedExpediente
+        {
+            get => _selectedExpediente;
+            set
+            {
+                _selectedExpediente = value;
+                OnPropertyChanged(nameof(SelectedExpediente));
+                OnPropertyChanged(nameof(SelectedExpedienteUrl));
             }
         }
 
         public ICommand BorrarExpedientesCommand { get; }
         public ICommand SeleccionarArchivoCommand { get; }
+        public ICommand ExportarCsvCommand { get; }
+        public ICommand ExportarExcelCommand { get; }
 
         public ExpedienteViewModel()
         {
+
+        }
+
+        public ExpedienteViewModel(DataGrid dataGrid)
+        {
+            IsBusy = true;
+
+            _dataGrid = dataGrid;
+
             // Inicializar la colección de expedientes
             _expedientes = MockExpedienteData.GetMockExpedientes();
             CalcularIsOrphan();
@@ -140,7 +181,160 @@ namespace GestorRemesasWpf.ViewModels
 
             BorrarExpedientesCommand = new RelayCommand(BorrarExpedientes);
             SeleccionarArchivoCommand = new RelayCommand(SeleccionarArchivo);
-            FiltrarExpedientes();
+            ExportarCsvCommand = new RelayCommand(ExportarCsv);
+            ExportarExcelCommand = new RelayCommand(ExportarExcel);
+            FiltrarExpedientes(true);
+
+            IsBusy = false;
+        }
+
+        private void ExportarExcel()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var workbook = new XLWorkbook())
+                    {
+                        var worksheet = workbook.Worksheets.Add("Expedientes");
+
+                        // Añadir encabezados
+                        worksheet.Cell(1, 1).Value = "DocID";
+                        worksheet.Cell(1, 2).Value = "RutaWindream";
+                        worksheet.Cell(1, 3).Value = "NoAutorizacion";
+                        worksheet.Cell(1, 4).Value = "FechaCreacion";
+                        worksheet.Cell(1, 5).Value = "Cobertura";
+                        worksheet.Cell(1, 6).Value = "NIFMutua";
+                        worksheet.Cell(1, 7).Value = "NombrePaciente";
+                        worksheet.Cell(1, 8).Value = "DNIPaciente";
+                        worksheet.Cell(1, 9).Value = "FechaFactura";
+                        worksheet.Cell(1, 10).Value = "NoFactura";
+                        worksheet.Cell(1, 11).Value = "Remesa";
+                        worksheet.Cell(1, 12).Value = "CoberturaInforme";
+                        worksheet.Cell(1, 13).Value = "TipoDoc";
+                        worksheet.Cell(1, 14).Value = "IsOrphan";
+                        worksheet.Cell(1, 15).Value = "EsFacturaCargada";
+                        worksheet.Cell(1, 16).Value = "EsFacturaOrphan";
+                        worksheet.Cell(1, 17).Value = "EsFacturaInvalida";
+                        worksheet.Cell(1, 18).Value = "FaltaInforme";
+                        worksheet.Cell(1, 19).Value = "FaltaAutorizacion";
+
+                        int row = 2;
+                        foreach (Expediente expediente in ExpedientesFiltrados)
+                        {
+                            worksheet.Cell(row, 1).Value = expediente.DocID;
+                            worksheet.Cell(row, 2).Value = expediente.RutaWindream;
+                            worksheet.Cell(row, 3).Value = expediente.NoAutorizacion;
+                            worksheet.Cell(row, 4).Value = expediente.FechaCreacion;
+                            worksheet.Cell(row, 5).Value = expediente.Cobertura;
+                            worksheet.Cell(row, 6).Value = expediente.NIFMutua;
+                            worksheet.Cell(row, 7).Value = expediente.NombrePaciente;
+                            worksheet.Cell(row, 8).Value = expediente.DNIPaciente;
+                            worksheet.Cell(row, 9).Value = expediente.FechaFactura;
+                            worksheet.Cell(row, 10).Value = expediente.NoFactura;
+                            worksheet.Cell(row, 11).Value = expediente.Remesa;
+                            worksheet.Cell(row, 12).Value = expediente.CoberturaInforme;
+                            worksheet.Cell(row, 13).Value = expediente.TipoDoc;
+                            worksheet.Cell(row, 14).Value = expediente.IsOrphan;
+                            worksheet.Cell(row, 15).Value = expediente.EsFacturaCargada;
+                            worksheet.Cell(row, 16).Value = expediente.EsFacturaOrphan;
+                            worksheet.Cell(row, 17).Value = expediente.EsFacturaInvalida;
+                            worksheet.Cell(row, 18).Value = expediente.FaltaInforme;
+                            worksheet.Cell(row, 19).Value = expediente.FaltaAutorizacion;
+
+                            // Aplicar colores basados en las condiciones del XAML
+                            switch (expediente.TipoDoc)
+                            {
+                                case "Autorización":
+                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#dc3545");
+                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    break;
+                                case "Informe":
+                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#007bff");
+                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    break;
+                                case "Factura":
+                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#28a745");
+                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    break;
+                            }
+
+                            if (expediente.EsFacturaCargada)
+                            {
+                                worksheet.Cell(row, 10).Style.Fill.BackgroundColor = XLColor.FromHtml("#28a745");
+                                worksheet.Cell(row, 10).Style.Font.FontColor = XLColor.White;
+                                worksheet.Cell(row, 10).Style.Font.Bold = true;
+                            }
+                            if (expediente.EsFacturaOrphan)
+                            {
+                                worksheet.Cell(row, 10).Style.Fill.BackgroundColor = XLColor.FromHtml("#ffc107");
+                                worksheet.Cell(row, 10).Style.Font.Bold = true;
+                            }
+                            if (expediente.EsFacturaInvalida)
+                            {
+                                worksheet.Cell(row, 10).Style.Fill.BackgroundColor = XLColor.FromHtml("#dc3545");
+                                worksheet.Cell(row, 10).Style.Font.FontColor = XLColor.White;
+                                worksheet.Cell(row, 10).Style.Font.Bold = true;
+                            }
+                            if (expediente.EsFacturaSinAutorizacion)
+                            {
+                                worksheet.Cell(row, 3).Style.Fill.BackgroundColor = XLColor.FromHtml("#ffc107");
+                                worksheet.Cell(row, 3).Style.Font.Bold = true;
+                            }
+                            if (expediente.EsFacturaSinInforme)
+                            {
+                                worksheet.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml("#ffc107");
+                                worksheet.Cell(row, 12).Style.Font.Bold = true;
+                            }
+
+                            row++;
+                        }
+
+                        workbook.SaveAs(saveFileDialog.FileName);
+
+                        MessageBox.Show("Archivo exportado correctamente", "Exportar a Excel", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al exportar el archivo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ExportarCsv()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    using (var writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        writer.WriteLine("DocID,RutaWindream,NoAutorizacion,FechaCreacion,Cobertura,NIFMutua,NombrePaciente,DNIPaciente,FechaFactura,NoFactura,Remesa,CoberturaInforme,TipoDoc,IsOrphan,EsFacturaCargada,EsFacturaOrphan,EsFacturaInvalida,FaltaInforme,FaltaAutorizacion");
+
+                        foreach (Expediente expediente in ExpedientesFiltrados)
+                        {
+                            writer.WriteLine($"{expediente.DocID},{expediente.RutaWindream},{expediente.NoAutorizacion},{expediente.FechaCreacion},{expediente.Cobertura},{expediente.NIFMutua},{expediente.NombrePaciente},{expediente.DNIPaciente},{expediente.FechaFactura},{expediente.NoFactura},{expediente.Remesa},{expediente.CoberturaInforme},{expediente.TipoDoc},{expediente.IsOrphan},{expediente.EsFacturaCargada},{expediente.EsFacturaOrphan},{expediente.EsFacturaInvalida},{expediente.FaltaInforme},{expediente.FaltaAutorizacion}");
+                        }
+
+                        MessageBox.Show("Archivo exportado correctamente", "Exportar a CSV", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al exportar el archivo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void CalcularIsOrphan()
@@ -201,8 +395,10 @@ namespace GestorRemesasWpf.ViewModels
         public bool EsFacturaOrphan(Expediente expediente) => IsFacturaCargada(expediente.NoFactura) && expediente.IsOrphan;
         public bool EsFacturaInvalida(Expediente expediente) => IsFacturaCargada(expediente.NoFactura) && !string.IsNullOrEmpty(expediente.Remesa);
 
-        private void FiltrarExpedientes()
+        private void FiltrarExpedientes(bool selectListado)
         {
+            if (!selectListado) IsBusy = true;
+
             ExpedientesFiltrados.Filter = expediente =>
             {
                 var exp = (Expediente)expediente;
@@ -222,12 +418,14 @@ namespace GestorRemesasWpf.ViewModels
                 return mutuaMatch && filtroMutuaMatch && remesaMatch && isOrphanMatch && isFacturaMatch && facturaArchivoMatch;
             };
             ExpedientesFiltrados.Refresh();
+
+            if (!selectListado) IsBusy = false;
         }
 
         private void BorrarExpedientes()
         {
             _expedientes.Clear();
-            FiltrarExpedientes();
+            FiltrarExpedientes(false);
         }
 
         private void SeleccionarArchivo()
@@ -241,12 +439,13 @@ namespace GestorRemesasWpf.ViewModels
             {
                 try
                 {
+                    IsBusy = true;
                     FacturasCargadas = File.ReadAllLines(openFileDialog.FileName).ToList();
                     NombreArchivo = openFileDialog.FileName;
                     ColorMensajeArchivo = Brushes.Black;
                     CalcularIsFacturaCargada();
-                    FiltrarExpedientes();
-
+                    FiltrarExpedientes(true);
+                    IsBusy = false;
                     // Obtener las facturas que no están en la colección de expedientes
                     var facturasNoEncontradas = FacturasCargadas.Where(f => !_expedientes.Any(e => e.NoFactura == f)).ToList();
 
@@ -271,6 +470,10 @@ namespace GestorRemesasWpf.ViewModels
                 {
                     NombreArchivo = "Error al cargar el archivo";
                     ColorMensajeArchivo = Brushes.Red;
+                }
+                finally
+                {
+                    IsBusy = false;
                 }
             }
         }
@@ -302,6 +505,15 @@ namespace GestorRemesasWpf.ViewModels
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
+        }
+    }
+
+    // Add this extension method to convert System.Windows.Media.Color to System.Drawing.Color
+    public static class ColorExtensions
+    {
+        public static System.Drawing.Color ToDrawingColor(this System.Windows.Media.Color color)
+        {
+            return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
     }
 }

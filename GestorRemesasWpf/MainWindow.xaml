@@ -3,10 +3,12 @@
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
        xmlns:local="clr-namespace:GestorRemesasWpf"
        xmlns:vm="clr-namespace:GestorRemesasWpf.ViewModels"
        xmlns:converters="clr-namespace:GestorRemesasWpf.Converters"
        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
        mc:Ignorable="d"
        Title="Gestión de remesas" MinHeight="800" MinWidth="1200"
        FontFamily="Segoe UI">
@@ -24,6 +26,7 @@
         <SolidColorBrush x:Key="SplitterBrush" Color="#6c757d" />
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <converters:NullToDefaultUrlConverter x:Key="NullToDefaultUrlConverter" />
 
         <!-- Estilo para la columna TipoDoc -->
         <Style x:Key="TipoDocumentoCellStyle" TargetType="DataGridCell">
@@ -120,6 +123,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Primera fila de la primera columna -->
@@ -181,9 +185,10 @@
                 </GroupBox>
             </Grid>
 
-            <!-- Segunda fila de la primera columna -->
-            <Grid Grid.Row="1" Background="{StaticResource BackgroundBrush}">
-                <DataGrid ItemsSource="{Binding ExpedientesFiltrados}" AutoGenerateColumns="False" Margin="10" CanUserAddRows="False">
+            <!-- Segunda fila de la primera columna -->            
+            <xctk:BusyIndicator Grid.Row="1" Background="{StaticResource BackgroundBrush}" IsBusy="{Binding IsBusy}" BusyContent="Actualizando...">
+                <DataGrid x:Name="ExpedientesDataGrid" ItemsSource="{Binding ExpedientesFiltrados}" 
+                          AutoGenerateColumns="False" Margin="10" CanUserAddRows="False" SelectedItem="{Binding SelectedExpediente}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}" />
                         <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" />
@@ -198,7 +203,26 @@
                         <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" CellStyle="{StaticResource InformeCellStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
+             </xctk:BusyIndicator>
+
+                <!-- Botones de acción -->
+            <Grid Grid.Row="2" Background="{StaticResource BackgroundBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,0,0,10" Grid.Column="0">
+                    <Button Content="Exportar a CSV" Width="120" Height="40" Background="{StaticResource PrimaryBrush}" Foreground="White" 
+                            Command="{Binding ExportarCsvCommand}"/>
+                    <Button Content="Exportar a Excel" Width="120" Height="40" Background="{StaticResource PrimaryBrush}" Foreground="White" 
+                            Command="{Binding ExportarExcelCommand}" Margin="10,0,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0, 0, 10, 10">
+                    <Button HorizontalAlignment="Right" Content="Crear Remesa" Style="{StaticResource GreenButtonStyle}" 
+                            Width="Auto" Height="40"/>
+                </StackPanel>
             </Grid>
+                        
         </Grid>
 
         <!-- Splitter vertical -->
@@ -207,6 +231,11 @@
         <!-- Segunda columna -->
         <Grid Grid.Column="2" Background="{StaticResource BackgroundBrush}">
             <!-- Contenido de la segunda columna -->
+            <TabControl Grid.Column="1" Margin="10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TabItem Header="Visor de Documento">
+                    <wv2:WebView2 Source="{Binding SelectedExpedienteUrl, Converter={StaticResource NullToDefaultUrlConverter}}"/>
+                </TabItem>
+            </TabControl>
         </Grid>
     </Grid>
 </Window>

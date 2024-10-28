@@ -1,4 +1,5 @@
-﻿using LibUtil;
+﻿using GestorRemesasWpf.ViewModels;
+using LibUtil;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -23,6 +24,7 @@ namespace GestorRemesasWpf
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new ExpedienteViewModel(ExpedientesDataGrid);
             LoadMutuas();
         }
 
