@@ -121,7 +121,7 @@ namespace GestorRemesasWpf
             }
 
             // Recuperamos del archivo ini la unidad de red de windream y el nombre del object type
-            var pathIniFile = Path.Combine(GetExecutablePath(), "GestorExpedientesWpf.ini");
+            var pathIniFile = Path.Combine(GetExecutablePath(), "GestorRemesasWpf.ini");
             IniFile iniFile = new IniFile(pathIniFile);
 
             string? unidadRed = iniFile.ReadValue("Windream", "UnidadRed");
@@ -213,5 +213,56 @@ namespace GestorRemesasWpf
             return result;
         }
 
+        private bool PrepareDocumentForEditing(WMObject document)
+        {
+            if (!document.IsEditableFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {
+                return false;
+            }
+
+
+            if (!document.LockFor((int)WMObjectEditMode.WMObjectEditModeObjectAndRights))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public void AsignarRemesaExpediente(List<int> docIds, string remesa)
+        {
+            if (!Login2Windream())
+            {
+                throw new InvalidOperationException("No se pudo conectar a Windream.");
+            }
+
+            try
+            {
+                foreach (var docId in docIds)
+                {
+                    WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, docId);
+
+                    if (!PrepareDocumentForEditing(document))
+                    {
+                        MessageBox.Show("No se pudo bloquear el documento para edición.", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+                        continue;
+                    }
+
+                    if (document == null)
+                    {
+                        throw new InvalidOperationException("No se encontró el documento en Windream.");
+                    }
+
+                    document.SetVariableValue("Remesa", remesa);
+                    document.AddHistory("Remesa asignada: " + remesa);
+                    document.Save();
+                    document.unlock();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al asignar la remesa al expediente: " + ex.Message, "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }

@@ -37,13 +37,30 @@ namespace GestorRemesasWpf.ViewModels
         private bool _isFacturaFilter = true;
         private bool _mostrarSoloFacturasDelArchivo;
         private DataGrid _dataGrid;
+        private bool _aplicarFiltroFechas;  
 
         private Expediente? _selectedExpediente;
 
         public ObservableCollection<Expediente> Expedientes { get; set; }
-        public ICollectionView ExpedientesFiltrados { get; set; }
+
+        private ICollectionView _expedientesFiltrados;
+        
+        public ICollectionView ExpedientesFiltrados
+        {
+            get => _expedientesFiltrados;
+            set
+            {
+                _expedientesFiltrados = value;
+                OnPropertyChanged(nameof(ExpedientesFiltrados));        
+            }
+        }
+
         public List<string> FacturasCargadas { get; set; }
         private bool _isBusy;
+
+        private readonly Windream _windream;
+        private DateTime _fechaInicio;
+        private DateTime _fechaFin;
 
         public string MutuaSeleccionada
         {
@@ -52,7 +69,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _mutuaSeleccionada = value;
                 OnPropertyChanged(nameof(MutuaSeleccionada));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -63,7 +80,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _filtroMutua = value;
                 OnPropertyChanged(nameof(FiltroMutua));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -74,7 +91,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _remesaFilter = value;
                 OnPropertyChanged(nameof(RemesaFilter));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -85,7 +102,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _isOrphanFilter = value;
                 OnPropertyChanged(nameof(IsOrphanFilter));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -116,7 +133,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _isFacturaFilter = value;
                 OnPropertyChanged(nameof(IsFacturaFilter));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -127,7 +144,7 @@ namespace GestorRemesasWpf.ViewModels
             {
                 _mostrarSoloFacturasDelArchivo = value;
                 OnPropertyChanged(nameof(MostrarSoloFacturasDelArchivo));
-                FiltrarExpedientes(false);
+                FiltrarExpedientes();
             }
         }
 
@@ -154,10 +171,58 @@ namespace GestorRemesasWpf.ViewModels
             }
         }
 
+        public bool AplicarFiltroFechas
+        {
+            get => _aplicarFiltroFechas;
+            set
+            {
+                _aplicarFiltroFechas = value;
+                OnPropertyChanged(nameof(AplicarFiltroFechas));
+            }
+        }
+
+        public DateTime FechaInicio
+        {
+            get => _fechaInicio;
+            set
+            {
+                _fechaInicio = value;
+                OnPropertyChanged(nameof(FechaInicio));
+            }
+        }
+
+        public DateTime FechaFin
+        {
+            get => _fechaFin;
+            set
+            {
+                _fechaFin = value;
+                OnPropertyChanged(nameof(FechaFin));
+            }
+        }
+
+
         public ICommand BorrarExpedientesCommand { get; }
         public ICommand SeleccionarArchivoCommand { get; }
         public ICommand ExportarCsvCommand { get; }
         public ICommand ExportarExcelCommand { get; }
+        public ICommand ActualizarCommand { get; }
+        public ICommand CrearRemesaCommand { get; }
+
+        private async void Actualizar()
+        {
+            IsBusy = true;
+
+            try
+            {
+                await Task.Run(() => CargarExpedientes(AplicarFiltroFechas, FechaInicio, FechaFin));
+                FiltrarExpedientes();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
 
         public ExpedienteViewModel()
         {
@@ -166,15 +231,20 @@ namespace GestorRemesasWpf.ViewModels
 
         public ExpedienteViewModel(DataGrid dataGrid)
         {
-            IsBusy = true;
+
+            _windream = new Windream();
+
+            FechaInicio = DateTime.Now;
+            FechaFin = DateTime.Now;
 
             _dataGrid = dataGrid;
 
             // Inicializar la colección de expedientes
-            _expedientes = MockExpedienteData.GetMockExpedientes();
-            CalcularIsOrphan();
+            //_expedientes = MockExpedienteData.GetMockExpedientes();
+            //CalcularIsOrphan();
 
-            ExpedientesFiltrados = CollectionViewSource.GetDefaultView(_expedientes);
+            // Esto tiene que ir en actualizar
+           
 
             // Inicializar RemesaFilter a Todos
             _remesaFilter = RemesaFilter.Todos;
@@ -183,9 +253,53 @@ namespace GestorRemesasWpf.ViewModels
             SeleccionarArchivoCommand = new RelayCommand(SeleccionarArchivo);
             ExportarCsvCommand = new RelayCommand(ExportarCsv);
             ExportarExcelCommand = new RelayCommand(ExportarExcel);
-            FiltrarExpedientes(true);
+            ActualizarCommand = new RelayCommand(Actualizar);
+            CrearRemesaCommand = new RelayCommand(AbrirCrearRemesa);
+            //FiltrarExpedientes();
 
-            IsBusy = false;
+        }
+
+        private void AbrirCrearRemesa()
+        {
+            // Validar que ExpedientesFiltrados y _expedientes tengan datos
+            // Validar que ExpedientesFiltrados y _expedientes no sean nulos
+            if (_expedientes == null || ExpedientesFiltrados == null)
+            {
+                MessageBox.Show("Los expedientes no están cargados correctamente.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!_expedientes.Any() || !ExpedientesFiltrados.Cast<Expediente>().Any())
+            {
+                MessageBox.Show("No hay expedientes disponibles para crear una remesa.", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var ventanaCrearRemesa = new CrearRemesaWindow
+            {
+                DataContext = new CrearRemesaViewModel(ExpedientesFiltrados.Cast<Expediente>().ToList(), _expedientes.ToList()),
+                Owner = Application.Current.MainWindow
+            };
+            ventanaCrearRemesa.ShowDialog();
+            
+            if (ventanaCrearRemesa.DataContext is CrearRemesaViewModel crearRemesaViewModel)
+            {
+                if (crearRemesaViewModel.CrearRemesaOk)
+                {
+                    // Actualizar la lista de expedientes
+                    Actualizar();
+                    NombreArchivo = "";
+                    FacturasCargadas.Clear();
+                }
+            }
+        }
+
+        public void CargarExpedientes(bool aplicarFiltroFechas, DateTime fechaInicio, DateTime fechaFin)
+        {
+            var expedientes = _windream.GetExpedientes(aplicarFiltroFechas, fechaInicio, fechaFin);
+            _expedientes = expedientes;
+            CalcularIsOrphan();            
+            ExpedientesFiltrados = CollectionViewSource.GetDefaultView(_expedientes);            
         }
 
         private void ExportarExcel()
@@ -395,10 +509,8 @@ namespace GestorRemesasWpf.ViewModels
         public bool EsFacturaOrphan(Expediente expediente) => IsFacturaCargada(expediente.NoFactura) && expediente.IsOrphan;
         public bool EsFacturaInvalida(Expediente expediente) => IsFacturaCargada(expediente.NoFactura) && !string.IsNullOrEmpty(expediente.Remesa);
 
-        private void FiltrarExpedientes(bool selectListado)
-        {
-            if (!selectListado) IsBusy = true;
-
+        private async void FiltrarExpedientes()
+        {                        
             ExpedientesFiltrados.Filter = expediente =>
             {
                 var exp = (Expediente)expediente;
@@ -417,15 +529,13 @@ namespace GestorRemesasWpf.ViewModels
                 
                 return mutuaMatch && filtroMutuaMatch && remesaMatch && isOrphanMatch && isFacturaMatch && facturaArchivoMatch;
             };
-            ExpedientesFiltrados.Refresh();
-
-            if (!selectListado) IsBusy = false;
+            ExpedientesFiltrados.Refresh();            
         }
 
         private void BorrarExpedientes()
         {
             _expedientes.Clear();
-            FiltrarExpedientes(false);
+            FiltrarExpedientes();
         }
 
         private void SeleccionarArchivo()
@@ -444,7 +554,7 @@ namespace GestorRemesasWpf.ViewModels
                     NombreArchivo = openFileDialog.FileName;
                     ColorMensajeArchivo = Brushes.Black;
                     CalcularIsFacturaCargada();
-                    FiltrarExpedientes(true);
+                    FiltrarExpedientes();
                     IsBusy = false;
                     // Obtener las facturas que no están en la colección de expedientes
                     var facturasNoEncontradas = FacturasCargadas.Where(f => !_expedientes.Any(e => e.NoFactura == f)).ToList();

@@ -6,5 +6,6 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <converters:UniqueCoberturaConverter x:Key="UniqueCoberturaConverter" />
+        <converters:StringToBooleanConverter x:Key="StringToBooleanConverter" />
     </Application.Resources>
 </Application>

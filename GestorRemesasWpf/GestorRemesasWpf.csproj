@@ -64,6 +64,9 @@
     <None Update="GestorRemesasWpf.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="index_template.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="mutuas.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

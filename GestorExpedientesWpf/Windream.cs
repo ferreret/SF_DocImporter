@@ -235,15 +235,24 @@ namespace GestorExpedientesWpf
                     }
 
                     document.SetVariableValue("NoAutorizacion", editExpediente.NoAutorizacion);
+                    document.AddHistory($"NoAutorizacion: {expediente.NoAutorizacion} -> {editExpediente.NoAutorizacion}");
                     document.SetVariableValue("Cobertura", editExpediente.Cobertura);
+                    document.AddHistory($"Cobertura: {expediente.Cobertura} -> {editExpediente.Cobertura}");
                     document.SetVariableValue("NIFMutua", editExpediente.NIFMutua);
+                    document.AddHistory($"NIFMutua: {expediente.NIFMutua} -> {editExpediente.NIFMutua}");
                     document.SetVariableValue("NombrePaciente", editExpediente.NombrePaciente);
+                    document.AddHistory($"NombrePaciente: {expediente.NombrePaciente} -> {editExpediente.NombrePaciente}");
                     document.SetVariableValue("DNIPaciente", editExpediente.DNIPaciente);
+                    document.AddHistory($"DNIPaciente: {expediente.DNIPaciente} -> {editExpediente.DNIPaciente}");
                     document.SetVariableValue("FechaFactura", editExpediente.FechaFactura);
+                    document.AddHistory($"FechaFactura: {expediente.FechaFactura} -> {editExpediente.FechaFactura}");
                     document.SetVariableValue("NoFactura", editExpediente.NoFactura);
+                    document.AddHistory($"NoFactura: {expediente.NoFactura} -> {editExpediente.NoFactura}");
                     document.SetVariableValue("Remesa", editExpediente.Remesa);
+                    document.AddHistory($"Remesa: {expediente.Remesa} -> {editExpediente.Remesa}");
                     document.SetVariableValue("CoberturaInforme", editExpediente.CoberturaInforme);
-                    
+                    document.AddHistory($"CoberturaInforme: {expediente.CoberturaInforme} -> {editExpediente.CoberturaInforme}");
+
                     document.Save();
                     document.unlock();
                 }
