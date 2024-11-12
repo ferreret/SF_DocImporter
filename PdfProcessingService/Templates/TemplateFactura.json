@@ -16,18 +16,21 @@
             "Name": "NoAutorizacion",
             "Top": 561,
             "Left": 145,
-            "Width": 47,
+            "Width": 60,
             "Height": 15,
-            "Expression": "^B\\d{7}$"
+            "Expression": ".*"
         },
-        {
-            "Name": "Mutua",
-            "Top": 649,
-            "Left": 338,
-            "Width": 400,
-            "Height": 30,
-            "Expression": "[A-ZÁÉÍÓÚÑ\\s]+"
-        },
+      {
+        "Name": "Mutua",
+        "Top": 640,
+        "Left": 338,
+        "Width": 420,
+        "Height": 40,
+        "Expression": "(?m)[A-ZÁÉÍÓÚÑ\\s\\(\\).]+"
+
+
+
+      },
         {
             "Name": "NombrePaciente",
             "Top": 652,
