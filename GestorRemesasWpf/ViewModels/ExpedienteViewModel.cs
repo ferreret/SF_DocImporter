@@ -538,11 +538,54 @@ namespace GestorRemesasWpf.ViewModels
             FiltrarExpedientes();
         }
 
+        private List<string> ExtraerFacturas(string filePath)
+        {
+            var facturas = new List<string>();
+
+            // Asegurarse de que el archivo exista
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("El archivo no existe.");
+            }
+
+            // Leer las líneas del archivo
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Verificar que hay líneas en el archivo
+            if (lines.Length < 4)
+            {
+                throw new Exception("El archivo no contiene suficientes datos.");
+            }
+
+            // Iterar sobre las líneas desde la fila donde empiezan los datos (después del encabezado)
+            for (int i = 3; i < lines.Length; i++)
+            {
+                string line = lines[i];
+
+                // Dividir la línea por el delimitador (;)
+                string[] columns = line.Split(';');
+
+                // Verificar si hay suficientes columnas
+                if (columns.Length > 0)
+                {
+                    string numeroFactura = columns[0].Trim();
+
+                    // Comprobar que el número de factura empieza por "MSF"
+                    if (numeroFactura.StartsWith("MSF", StringComparison.OrdinalIgnoreCase))
+                    {
+                        facturas.Add(numeroFactura);
+                    }
+                }
+            }
+
+            return facturas;
+        }
+
         private void SeleccionarArchivo()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*"
+                Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -550,7 +593,9 @@ namespace GestorRemesasWpf.ViewModels
                 try
                 {
                     IsBusy = true;
-                    FacturasCargadas = File.ReadAllLines(openFileDialog.FileName).ToList();
+
+                    FacturasCargadas = ExtraerFacturas(openFileDialog.FileName);
+
                     NombreArchivo = openFileDialog.FileName;
                     ColorMensajeArchivo = Brushes.Black;
                     CalcularIsFacturaCargada();

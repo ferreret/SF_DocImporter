@@ -11,7 +11,8 @@
        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
        mc:Ignorable="d"
        Title="Gestión de remesas" MinHeight="800" MinWidth="1200"
-       FontFamily="Segoe UI">
+       FontFamily="Segoe UI"       
+       >
 
     <Window.DataContext>
         <vm:ExpedienteViewModel />
@@ -192,9 +193,9 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}" />
                         <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" />
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=d}" />
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat={}{0:dd/MM/yyyy}}" />
                         <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" CellStyle="{StaticResource NoAutorizacionCellStyle}" />
-                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=d}" />
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat={}{0:dd/MM/yyyy}}" />
                         <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" />
                         <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" />
                         <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" />
