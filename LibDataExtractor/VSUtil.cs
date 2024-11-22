@@ -151,7 +151,7 @@ namespace LibDataExtractor
             );
         }
 
-        public static string GetTextFromAnchorText(string pdfPath, int pageNumber, string anchorText)
+        public static string GetTextFromAnchorText(string pdfPath, int pageNumber, string anchorText, bool column = false)
         {
 
             using PdfDocument pdfDocument = new PdfDocument(pdfPath);
@@ -171,7 +171,15 @@ namespace LibDataExtractor
                 float x1 = textRegion.Rectangle.X + textRegion.Rectangle.Width;
                 float y1 = textRegion.Rectangle.Y + textRegion.Rectangle.Height;
 
-                RectangleF lineRect = new RectangleF(x1, (y0 + y1) / 2, page.MediaBox.Width - x1, 0);
+                float width = page.MediaBox.Width;
+
+                if (column)
+                {
+                    width = page.MediaBox.Width / 3;
+                }
+
+                RectangleF lineRect = new RectangleF(x1, (y0 + y1) / 2, width - x1, 0);
+
                 TextRegion textRegionSearch = sourceRegion.GetSubregion(lineRect, TextSelectionMode.Rectangle);
 
                 // Console.WriteLine("Text found: " + textRegionSearch.ToString());
@@ -185,5 +193,118 @@ namespace LibDataExtractor
                 return string.Empty;
             }
         }
+
+
+
+        public static string GetNombrePaciente(string pdfPath, int pageNumber)
+        {
+            using PdfDocument pdfDocument = new PdfDocument(pdfPath);
+            PdfPage page = pdfDocument.Pages[pageNumber];
+            TextRegion sourceRegion = page.TextRegion;
+
+            int startindex = 0;
+
+            TextRegion labelNombrePaciente = sourceRegion.FindText("Paciente:", ref startindex, false);
+            TextRegion labelDNI = sourceRegion.FindText("DNI:", ref startindex, false);
+
+            if (labelNombrePaciente != null && labelDNI != null)
+            {
+                float x0 = labelNombrePaciente.Rectangle.X;
+                float y0 = labelNombrePaciente.Rectangle.Y;
+                float x1 = labelNombrePaciente.Rectangle.X + labelNombrePaciente.Rectangle.Width;
+                float y1 = labelDNI.Rectangle.Y;
+                float width = page.MediaBox.Width / 1.8f;
+                RectangleF lineRect = new RectangleF(x1, (y0 + y1) / 2, width - x1, y0 - y1);
+                TextRegion textRegionSearch = sourceRegion.GetSubregion(lineRect, TextSelectionMode.Rectangle);
+                // Console.WriteLine("Text found: " + textRegionSearch.ToString());
+                // Console.WriteLine($"Left: {textRegionSearch.Rectangle.Left}, Top: {textRegionSearch.Rectangle.Top}, Width: {textRegionSearch.Rectangle.Width}, Height: {textRegionSearch.Rectangle.Height}");
+                string resultado =  textRegionSearch.TextContent;
+                return resultado;
+            }
+
+            return "";
+        }
+
+        public static string GetMutua(string pdfPath, int pageNumber)
+        {
+            using PdfDocument pdfDocument = new PdfDocument(pdfPath);
+            PdfPage page = pdfDocument.Pages[pageNumber];
+            TextRegion sourceRegion = page.TextRegion;
+
+            int startindex = 0;
+
+            TextRegion labelNombrePaciente = sourceRegion.FindText("Paciente:", ref startindex, false);
+            TextRegion labelDNI = sourceRegion.FindText("DNI:", ref startindex, false);
+
+            if (labelNombrePaciente != null && labelDNI != null)
+            {
+                float x0 = labelNombrePaciente.Rectangle.X;
+                float y0 = labelNombrePaciente.Rectangle.Y;                
+                float y1 = labelDNI.Rectangle.Y;
+                float x1 = labelDNI.Rectangle.X;
+                float width = page.MediaBox.Width * 1.1f;
+                RectangleF lineRect = new RectangleF(width / 2, y0, width, y1 - y0);
+                TextRegion textRegionSearch = sourceRegion.GetSubregion(lineRect, TextSelectionMode.Rectangle);
+                // Console.WriteLine("Text found: " + textRegionSearch.ToString());
+                // Console.WriteLine($"Left: {textRegionSearch.Rectangle.Left}, Top: {textRegionSearch.Rectangle.Top}, Width: {textRegionSearch.Rectangle.Width}, Height: {textRegionSearch.Rectangle.Height}");
+                string resultado = textRegionSearch.TextContent;
+
+
+                float x0_dni = labelDNI.Rectangle.X;
+                float y0_dni = labelDNI.Rectangle.Y;
+                float x1_dni = labelDNI.Rectangle.X + labelDNI.Rectangle.Width;
+                float y1_dni = labelDNI.Rectangle.Y + labelDNI.Rectangle.Height;
+
+                RectangleF postDNIRect = new RectangleF(width / 2, (y0_dni + y1_dni) / 2, width, 0);
+
+                TextRegion textRegionSearchDNI = sourceRegion.GetSubregion(postDNIRect, TextSelectionMode.Rectangle);
+
+                string lineaDNI = textRegionSearchDNI.TextContent;
+
+                // Si encuentro lineaDNI en resultado, lo elimino
+                if (resultado.Contains(lineaDNI))
+                {
+                    resultado = resultado.Replace(lineaDNI, "");
+                }
+
+                return Regex.Replace(resultado.Replace("\r", " ")
+                                 .Replace("\n", " ")
+                                 .Trim(), @"\s+", " ");
+            }
+
+            return "";
+        }
+
+        //    public static string GetAutorizacionFactura(string pdfPath, int pageNumber)
+        //    {
+        //        using PdfDocument pdfDocument = new PdfDocument(pdfPath);
+        //        PdfPage page = pdfDocument.Pages[pageNumber];
+        //        TextRegion sourceRegion = page.TextRegion;
+
+        //        int startindex = 0;
+        //        TextRegion labelAutorizacion = sourceRegion.FindText("Autorización:", ref startindex, false);
+        //        if (labelAutorizacion != null)
+        //        {
+        //            float x0 = labelAutorizacion.Rectangle.X;
+        //            float y0 = labelAutorizacion.Rectangle.Y;
+        //            float x1 = labelAutorizacion.Rectangle.X + labelAutorizacion.Rectangle.Width;
+        //            float y1 = labelAutorizacion.Rectangle.Y + labelAutorizacion.Rectangle.Height;
+
+        //            float width = page.MediaBox.Width / 3;
+
+        //            RectangleF lineRect = new RectangleF(x1, (y0 + y1) / 2, width - x1, 0);
+
+        //            TextRegion textRegionSearch = sourceRegion.GetSubregion(lineRect, TextSelectionMode.Rectangle);
+
+        //            // Console.WriteLine("Text found: " + textRegionSearch.ToString());
+        //            // Console.WriteLine($"Left: {textRegionSearch.Rectangle.Left}, Top: {textRegionSearch.Rectangle.Top}, Width: {textRegionSearch.Rectangle.Width}, Height: {textRegionSearch.Rectangle.Height}");
+
+        //            return textRegionSearch.TextContent;
+
+        //        }
+        //        return "";
+        //    }
+
+
     }
 }

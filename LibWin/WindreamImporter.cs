@@ -78,7 +78,7 @@ namespace LibWin
                 // Si no tenemos el número de factura, no podemos trabajar con el documento
                 if (String.IsNullOrEmpty(windreamIndexes.NoFactura) || !ValidateMutua(windreamIndexes.Cobertura, _serviceConfig.PathMutuas!))
                 {
-                    _fileLogger.LogError("Faltan datos claves en la Factura. Factura/Autorización/");
+                    _fileLogger.LogError("Faltan datos claves en la Factura.");
                     return "";
                 }
                 return importFactura(pathPdf, windreamIndexes, oObjectType);
@@ -559,7 +559,7 @@ namespace LibWin
 
             ArrayList lobjListaDocuments = new();
             string[] VariablesNames = { "szLongName", "dwDocID", "dwDocDBID" };
-            int MAXFETCHCOUNT = 50;
+            int MAXFETCHCOUNT = 100000;
             Array ResultList;
 
             try

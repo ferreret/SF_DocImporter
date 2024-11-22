@@ -63,7 +63,7 @@ namespace GestorExpedientesWpf
 
             ArrayList lobjListaDocuments = new();
             string[] VariablesNames = { "szLongName", "dwDocID", "dwDocDBID" };
-            int MAXFETCHCOUNT = 50;
+            int MAXFETCHCOUNT = 100000;
             Array ResultList;
 
             try

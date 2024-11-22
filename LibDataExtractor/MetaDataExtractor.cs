@@ -5,8 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Vintasoft.Imaging;
+using Vintasoft.Imaging.Pdf.Tree;
+using Vintasoft.Imaging.Pdf;
+using Vintasoft.Imaging.Text;
 
 namespace LibDataExtractor
 {
@@ -83,7 +87,58 @@ namespace LibDataExtractor
         private void ProcessFactura(string pathPdf, WindreamIndexes windreamIndexes)
         {
             // Extraer los metadatos de una factura
-            Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, _serviceConfig.PathTemplateFactura! , _fileLogger);
+            // Factura? factura = TemplateManagement.ApplyFacturaTemplate(pathPdf, _serviceConfig.PathTemplateFactura! , _fileLogger);
+
+            Factura factura = new Factura();
+
+            string fullText = VSUtil.GetFullText(pathPdf);
+
+            // NoFactura
+            var match = Regex.Match(fullText, @"MSF\d{8,10}");
+            if (match.Success)
+            {
+                factura.NoFactura = match.Value;
+
+                // Fecha Factura
+                var dateMatches = Regex.Matches(fullText.Substring(0, match.Index), @"\d{1,2}/\d{1,2}/\d{4}");
+                if (dateMatches.Count > 0)
+                {
+                    factura.FechaFactura = dateMatches[dateMatches.Count - 1].Value;
+                }
+            }
+
+            // NoAutorizacion y NIF Mutua
+            string lineaAutorizacion = VSUtil.GetTextFromAnchorText(pathPdf, 0, "Autorización:", false);
+
+            // Si hago un split por espacios y hay solo un elemento, es el cif de mutua
+            string[] splitLineaAutorizacion = lineaAutorizacion.Split(' ');
+            if (splitLineaAutorizacion.Length == 1)
+            {
+                factura.CIFMutua = splitLineaAutorizacion[0];
+                factura.NoAutorizacion = string.Empty;
+            }
+            else
+            {
+                factura.NoAutorizacion = splitLineaAutorizacion[0];
+                factura.CIFMutua = splitLineaAutorizacion[1];
+            }
+
+            // DNI Paciente
+            factura.DNIPaciente = VSUtil.GetTextFromAnchorText(pathPdf, 0, "DNI:", true);
+
+            // Nombre Paciente
+            factura.NombrePaciente = VSUtil.GetNombrePaciente(pathPdf, 0);
+
+            if (!string.IsNullOrEmpty(factura.NombrePaciente) && !string.IsNullOrEmpty(factura.DNIPaciente))
+            {
+                factura.NombrePaciente = factura.NombrePaciente.Replace(factura.DNIPaciente, string.Empty)
+                                                               .Replace("\r", " ")
+                                                               .Replace("\n", " ")
+                                                               .Trim();
+            }
+
+            // Get Mutua
+            factura.Mutua = VSUtil.GetMutua(pathPdf, 0);
 
             windreamIndexes.TipoDoc = TipoDocumento.Factura;
 
@@ -95,15 +150,15 @@ namespace LibDataExtractor
                 windreamIndexes.DNIPaciente = factura.DNIPaciente is null ? String.Empty : factura.DNIPaciente.RemoveCarriageReturns();
                 windreamIndexes.NombrePaciente = factura.NombrePaciente is null ? String.Empty : factura.NombrePaciente.RemoveCarriageReturns();
                 windreamIndexes.NIFMutua = factura.CIFMutua is null ? String.Empty : factura.CIFMutua.RemoveCarriageReturns();
-                windreamIndexes.Cobertura = factura.Mutua is null ? String.Empty : factura.Mutua.RemoveCarriageReturns();                
+                windreamIndexes.Cobertura = factura.Mutua is null ? String.Empty : factura.Mutua.RemoveCarriageReturns();
 
                 if (DateTime.TryParse(factura.FechaFactura, out DateTime fechaFactura))
                 {
-                     windreamIndexes.FechaFactura = fechaFactura;
+                    windreamIndexes.FechaFactura = fechaFactura;
                 }
                 else
                 {
-                   _fileLogger.LogError("Error al parsear la fecha de la factura.");
+                    _fileLogger.LogError("Error al parsear la fecha de la factura.");
                 }
             }
 
@@ -139,9 +194,9 @@ namespace LibDataExtractor
             if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
             {
                 string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(pathPdf);
-                if (fileNameWithoutExtension.EndsWith("-A"))
+                if (fileNameWithoutExtension.Contains("-A"))
                 {
-                    windreamIndexes.NoAutorizacion = fileNameWithoutExtension.Remove(fileNameWithoutExtension.Length - 2);
+                    windreamIndexes.NoAutorizacion = fileNameWithoutExtension.Split('-')[0];
                 }
                 else
                 {

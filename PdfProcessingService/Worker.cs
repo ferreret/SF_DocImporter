@@ -146,7 +146,7 @@ namespace PdfProcessingService
             }
 
             string fileImported = ImportFile(file, metadata, config);
-
+            
             if (!string.IsNullOrEmpty(fileImported))
             {
                 MoveProcessedFile(file, outputFolder, fileImported);
