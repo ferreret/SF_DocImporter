@@ -161,6 +161,7 @@
                                     <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaFin}"/>
                                     <Button Content="Actualizar" Margin="10,0,0,0" Width="100" Command="{Binding ActualizarCommand}" Background="#3498db" Foreground="White"/>
                                 </StackPanel>
+
                                 <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
                                     <CheckBox Content="Mostrar solo documentos huérfanos" IsChecked="{Binding MostrarSoloDocumentosHuerfanos}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                     <CheckBox Content="Ignorar documentos con remesa" IsChecked="{Binding IgnorarDocumentosConRemesa}" Margin="0,0,0,0" VerticalAlignment="Center"/>

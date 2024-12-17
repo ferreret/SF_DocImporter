@@ -510,7 +510,10 @@ namespace GestorRemesasWpf.ViewModels
         public bool EsFacturaInvalida(Expediente expediente) => IsFacturaCargada(expediente.NoFactura) && !string.IsNullOrEmpty(expediente.Remesa);
 
         private async void FiltrarExpedientes()
-        {                        
+        {
+
+            if (_expedientes == null) return;
+
             ExpedientesFiltrados.Filter = expediente =>
             {
                 var exp = (Expediente)expediente;

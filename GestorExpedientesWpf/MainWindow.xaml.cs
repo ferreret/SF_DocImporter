@@ -22,7 +22,7 @@ namespace GestorExpedientesWpf
     {
         public MainWindow()
         {            
-            InitializeComponent();            
+            InitializeComponent();                        
         }
 
         private void ResultadosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
