@@ -22,11 +22,15 @@ namespace GestorExpedientesWpf
     {
         public MainWindow()
         {            
-            InitializeComponent();                        
+            InitializeComponent();            
+            this.Title = "Gestor de Expedientes";
+            //this.labelCobertura.Content = "Cobertura";
+
         }
 
         private void ResultadosDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            
             if (sender is DataGrid dataGrid && dataGrid.SelectedItem is Expediente selectedExpediente)
             {
                 var viewModel = DataContext as ExpedientesViewModel;

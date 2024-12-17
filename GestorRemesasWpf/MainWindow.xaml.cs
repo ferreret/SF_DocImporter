@@ -26,6 +26,7 @@ namespace GestorRemesasWpf
             InitializeComponent();
             DataContext = new ExpedienteViewModel(ExpedientesDataGrid);
             LoadMutuas();
+            
         }
 
 
@@ -42,7 +43,7 @@ namespace GestorRemesasWpf
                                  .Where(line => !string.IsNullOrWhiteSpace(line))
                                  .OrderBy(m => m)
                                  .ToList();
-                    cmbMutuas.ItemsSource = mutuas;
+                    //cmbMutuas.ItemsSource = mutuas;
                 }
                 else
                 {
@@ -53,6 +54,68 @@ namespace GestorRemesasWpf
             {
                 MessageBox.Show($"Error al cargar las mutuas: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void txtMutuas_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtMutuas.Text))
+            {
+                popupMutuas.IsOpen = false;
+                return;
+            }
+
+            string textoBusqueda = txtMutuas.Text.ToLower();
+            List<string> resultadosFiltrados = mutuas
+                .Where(mutua => mutua.ToLower().Contains(textoBusqueda))
+                .ToList();
+
+            lstMutuas.ItemsSource = resultadosFiltrados;
+            popupMutuas.IsOpen = true;
+        }
+
+        private void SeleccionarMutua()
+        {
+            if (lstMutuas.SelectedItem != null)
+            {
+                txtMutuas.Text = lstMutuas.SelectedItem.ToString();
+                popupMutuas.IsOpen = false;
+
+                //Aquí puedes realizar acciones adicionales después de seleccionar la mutua,
+                //como por ejemplo:
+                //TuViewModel.MutuaSeleccionada = txtMutuas.Text;
+            }
+        }
+
+        private void lstMutuas_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            SeleccionarMutua();
+        }
+
+        private void lstMutuas_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                SeleccionarMutua();
+                e.Handled = true;
+            }
+        }
+
+        private void txtMutuas_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Tab || e.Key == Key.Down)
+            {
+                if (popupMutuas.IsOpen && lstMutuas.Items.Count > 0)
+                {
+                    lstMutuas.Focus();
+                    lstMutuas.SelectedIndex = 0;
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void txtMutuas_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            txtMutuas.SelectAll();
         }
     }
 }

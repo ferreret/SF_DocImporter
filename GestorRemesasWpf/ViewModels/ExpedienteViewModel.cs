@@ -517,7 +517,7 @@ namespace GestorRemesasWpf.ViewModels
             ExpedientesFiltrados.Filter = expediente =>
             {
                 var exp = (Expediente)expediente;
-                bool mutuaMatch = string.IsNullOrEmpty(_mutuaSeleccionada) || exp.Cobertura == _mutuaSeleccionada;
+                //bool mutuaMatch = string.IsNullOrEmpty(_mutuaSeleccionada) || exp.Cobertura == _mutuaSeleccionada;
                 bool filtroMutuaMatch = string.IsNullOrEmpty(_filtroMutua) || exp.Cobertura.Contains(_filtroMutua, StringComparison.OrdinalIgnoreCase);
                 bool isOrphanMatch = !_isOrphanFilter || exp.IsOrphan;
                 bool isFacturaMatch = !_isFacturaFilter || exp.TipoDoc == "Factura";
@@ -530,7 +530,8 @@ namespace GestorRemesasWpf.ViewModels
                 };
                 bool facturaArchivoMatch = !_mostrarSoloFacturasDelArchivo || (FacturasCargadas != null && FacturasCargadas.Contains(exp.NoFactura));
                 
-                return mutuaMatch && filtroMutuaMatch && remesaMatch && isOrphanMatch && isFacturaMatch && facturaArchivoMatch;
+                //return mutuaMatch && filtroMutuaMatch && remesaMatch && isOrphanMatch && isFacturaMatch && facturaArchivoMatch;
+                return filtroMutuaMatch && remesaMatch && isOrphanMatch && isFacturaMatch && facturaArchivoMatch;
             };
             ExpedientesFiltrados.Refresh();            
         }

@@ -7,13 +7,15 @@
        xmlns:local="clr-namespace:GestorRemesasWpf"
        xmlns:vm="clr-namespace:GestorRemesasWpf.ViewModels"
        xmlns:converters="clr-namespace:GestorRemesasWpf.Converters"
-       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+       
        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
        mc:Ignorable="d"
        Title="Gestión de remesas" MinHeight="800" MinWidth="1200"
        FontFamily="Segoe UI"       
        >
 
+    <!--xmlns:sys="clr-namespace:System;assembly=mscorlib"-->
+    
     <Window.DataContext>
         <vm:ExpedienteViewModel />
     </Window.DataContext>
@@ -144,7 +146,7 @@
                             <Separator Margin="0,10,0,10"/>
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
                                 <Label Content="Coberturas:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <ComboBox Name="cmbMutuas" 
+                                <!--<ComboBox Name="cmbMutuas" 
                                        Margin="0,0,0,0" 
                                        Width="300" 
                                        IsEditable="True" 
@@ -154,7 +156,30 @@
                                        Text="{Binding FiltroMutua, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                        SelectedItem="{Binding MutuaSeleccionada, Mode=TwoWay}" 
                                        IsSynchronizedWithCurrentItem="False"
-                                        VerticalAlignment="Center"/>
+                                        VerticalAlignment="Center"/>-->
+                                <TextBox x:Name="txtMutuas"
+                                    Margin="0,0,0,0"
+                                    Width="300"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Text="{Binding FiltroMutua, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    TextChanged="txtMutuas_TextChanged"
+                                    KeyDown="txtMutuas_KeyDown"
+                                    MouseDoubleClick="txtMutuas_MouseDoubleClick"     />
+                                <!--TextChanged="txtMutuas_TextChanged"-->
+
+                                <Popup x:Name="popupMutuas"
+                                    PlacementTarget="{Binding ElementName=txtMutuas}"
+                                    Placement="Bottom"
+                                    IsOpen="False"
+                                    StaysOpen="False">
+                                    <Border BorderBrush="Black" BorderThickness="1">
+                                        <ListBox x:Name="lstMutuas"
+                                                 MouseDoubleClick="lstMutuas_MouseDoubleClick"
+                                                 KeyDown="lstMutuas_KeyDown"/>
+                                    </Border>
+                                </Popup>
+                                
                                 <StackPanel Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
                                     <RadioButton Content="Todos" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.Todos}}" />
                                     <RadioButton Content="Sin Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.SinRemesa}}" Margin="10,0,0,0"/>
