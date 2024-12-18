@@ -48,6 +48,7 @@ namespace GestorExpedientesWpf.ViewModels
         private bool _isBusy;
         private bool _asegurarTriplete;
         private bool _editMetadataMode;
+        private string _filtroMutua;
 
         #endregion
 
@@ -163,6 +164,17 @@ namespace GestorExpedientesWpf.ViewModels
             {
                 _mostrarSoloDocumentosHuerfanos = value;
                 OnPropertyChanged(nameof(MostrarSoloDocumentosHuerfanos));
+                FiltrarExpedientes();
+            }
+        }
+
+        public string FiltroMutua
+        {
+            get => _filtroMutua;
+            set
+            {
+                _filtroMutua = value;
+                OnPropertyChanged(nameof(FiltroMutua));
                 FiltrarExpedientes();
             }
         }
@@ -329,7 +341,8 @@ namespace GestorExpedientesWpf.ViewModels
                 var expediente = e as Expediente;
                 bool pasaFiltroRemesa = !IgnorarDocumentosConRemesa || string.IsNullOrEmpty(expediente!.Remesa);
                 bool pasaFiltroHuerfanos = !MostrarSoloDocumentosHuerfanos || expediente!.IsOrphan;
-                return pasaFiltroRemesa && pasaFiltroHuerfanos;
+                bool pasaFiltroMutua = string.IsNullOrEmpty(FiltroMutua) || expediente!.Cobertura.Contains(FiltroMutua, StringComparison.OrdinalIgnoreCase);
+                return pasaFiltroRemesa && pasaFiltroHuerfanos && pasaFiltroMutua;
             };
 
             ExpedientesView = collectionView;
