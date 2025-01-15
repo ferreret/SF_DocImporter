@@ -265,6 +265,13 @@ namespace LibDataExtractor
                 if (resultado.Contains(lineaDNI))
                 {
                     resultado = resultado.Replace(lineaDNI, "");
+
+                    // Si en resultado hay dos retornos de carro, elimino lo que hay después de los dos retornos de carro
+                    if (resultado.Contains("\r\n\r\n"))
+                    {
+                        int index = resultado.IndexOf("\r\n\r\n");
+                        resultado = resultado.Substring(0, index);
+                    }
                 }
 
                 return Regex.Replace(resultado.Replace("\r", " ")
