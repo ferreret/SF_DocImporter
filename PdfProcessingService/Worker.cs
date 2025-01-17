@@ -137,6 +137,15 @@ namespace PdfProcessingService
                 metadata = _extractor.Extract(file, _fileLogger, config, tipoDoc);
                 _fileLogger.LogInformation(metadata.ToString());
             }
+            catch (IOException ex)
+            {
+                _fileLogger.LogError($"Error al abrir el archivo {file}: {ex.Message}");
+                _fileLogger.LogError("Dejamos el archivo sin moverlo a incidencias para procesar a posteriori");
+                // En este caso no movemos el archivo a la carpeta de incidencias, si no que lo dejamos a la espera
+                // MoveProcessedFile(file, errorFolder);
+                _totalFilesFailed++; // Increment the failed files count
+                return;
+            }
             catch (Exception ex)
             {
                 _fileLogger.LogError($"Error al extraer metadata del archivo {file}: {ex.Message}");
