@@ -38,6 +38,20 @@ namespace GestorRemesasWpf.Models
         private bool _esFacturaInvalida;
         private bool _faltaInforme;
         private bool _faltaAutorizacion;
+        private decimal _importeFactura;
+
+        public decimal ImporteFactura
+        {
+            get => _importeFactura;
+            set
+            {
+                if (_importeFactura != value)
+                {
+                    _importeFactura = value;
+                    OnPropertyChanged(nameof(ImporteFactura));
+                }
+            }
+        }
 
         public int DocID
         {

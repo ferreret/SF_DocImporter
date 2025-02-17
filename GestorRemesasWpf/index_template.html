@@ -48,10 +48,21 @@
             <th>NIF Mutua</th>
             <th>Nombre del Paciente</th>
             <th>DNI del Paciente</th>
+            <th>Importe Factura</th>
             <th>Documentos</th>
         </tr>
         <!-- Aquí irán las filas de la tabla -->
-        {{TABLE_ROWS}}
+        <tbody>
+            {{TABLE_ROWS}}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7"></td>
+                <td>{{IMPORTE_TOTAL}}</td>
+                <td></td>
+            </tr>
+        </tfoot>
     </table>
+
 </body>
 </html>

@@ -43,6 +43,7 @@
                       SelectedItem="{Binding TipoExportacion, Mode=TwoWay}" BorderBrush="{StaticResource SecondaryColor}">
                 <ComboBoxItem Content="Adeslas" />
                 <ComboBoxItem Content="Sanitas" />
+                <ComboBoxItem Content="Factura" />
             </ComboBox>
 
             <!-- Barra de Progreso -->

@@ -102,11 +102,15 @@ namespace GestorRemesasWpf.ViewModels
                 {
                     await Task.Run(() => ProcesarNumeroFactura(numeroFactura));
                 }
-                else
+                else if (TipoExportacion.ToString().EndsWith("Sanitas"))
                 {
                     await Task.Run(() => ProcesarNumeroFacturaSanitas(numeroFactura));
                 }
-                    
+                else
+                {
+                    await Task.Run(() => ProcesarNumeroFacturaGeneral(numeroFactura));
+                }
+
                 Progreso += incrementoProgreso;
             }
 
@@ -144,7 +148,8 @@ namespace GestorRemesasWpf.ViewModels
                     Cobertura = expedienteConFactura?.Cobertura ?? string.Empty,
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
-                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty
+                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
                 };
 
                 if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
@@ -245,7 +250,8 @@ namespace GestorRemesasWpf.ViewModels
                     Cobertura = expedienteConFactura?.Cobertura ?? string.Empty,
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
-                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty
+                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
                 };
 
                 if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
@@ -320,6 +326,104 @@ namespace GestorRemesasWpf.ViewModels
             }
         }
 
+        private void ProcesarNumeroFacturaGeneral(string numeroFactura)
+        {
+            string subcarpetaFactura = Path.Combine(CarpetaDestino, Remesa, numeroFactura);
+            try
+            {
+                if (!Directory.Exists(subcarpetaFactura))
+                {
+                    Directory.CreateDirectory(subcarpetaFactura);
+                }
+
+                var expedienteConFactura = ExpedientesFiltrados.FirstOrDefault(expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Factura");
+
+                // Crear objeto FacturaInfo para el índice HTML
+                var facturaInfo = new FacturaInfo
+                {
+                    NumeroFactura = numeroFactura,
+                    FechaFactura = expedienteConFactura?.FechaFactura ?? DateTime.MinValue,
+                    NoAutorizacion = expedienteConFactura?.NoAutorizacion ?? string.Empty,
+                    Cobertura = expedienteConFactura?.Cobertura ?? string.Empty,
+                    NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
+                    NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
+                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                };
+
+                if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
+                {
+                    string nombreArchivoDestino = $"{numeroFactura}F{Path.GetExtension(expedienteConFactura.RutaWindream)}";
+                    string destinoArchivo = Path.Combine(subcarpetaFactura, nombreArchivoDestino);
+                    File.Copy(expedienteConFactura.RutaWindream, destinoArchivo, true);
+                    DocIdsCopiados.Add(expedienteConFactura.DocID);
+
+                    facturaInfo.Documentos.Add(new DocumentoInfo
+                    {
+                        TipoDocumento = "Factura",
+                        NombreArchivo = nombreArchivoDestino,
+                        RutaRelativa = Path.Combine(numeroFactura, nombreArchivoDestino).Replace("\\", "/")
+                    });
+                }
+                else if (expedienteConFactura != null)
+                {
+                    MessageBox.Show($"El archivo no existe: {expedienteConFactura.RutaWindream}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                var expedienteConAutorizacion = ExpedientesTotales.FirstOrDefault(expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Autorización");
+
+                if (expedienteConAutorizacion != null && File.Exists(expedienteConAutorizacion.RutaWindream))
+                {
+                    string nombreArchivoDestino = $"{numeroFactura}A{Path.GetExtension(expedienteConAutorizacion.RutaWindream)}";
+                    string destinoArchivo = Path.Combine(subcarpetaFactura, nombreArchivoDestino);
+                    File.Copy(expedienteConAutorizacion.RutaWindream, destinoArchivo, true);
+                    DocIdsCopiados.Add(expedienteConAutorizacion.DocID);
+                    facturaInfo.Documentos.Add(new DocumentoInfo
+                    {
+                        TipoDocumento = "Autorización",
+                        NombreArchivo = nombreArchivoDestino,
+                        RutaRelativa = Path.Combine(numeroFactura, nombreArchivoDestino).Replace("\\", "/")
+                    });
+                }
+                else if (expedienteConAutorizacion != null)
+                {
+                    MessageBox.Show($"El archivo no existe: {expedienteConAutorizacion.RutaWindream}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                var expedientesConInforme = ExpedientesTotales.Where(expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Informe").ToList();
+                int contadorInforme = 1;
+                foreach (var expedienteConInforme in expedientesConInforme)
+                {
+                    if (File.Exists(expedienteConInforme.RutaWindream))
+                    {
+                        string nombreArchivoDestino = $"{numeroFactura}I-{contadorInforme}{Path.GetExtension(expedienteConInforme.RutaWindream)}";
+                        string destinoArchivo = Path.Combine(subcarpetaFactura, nombreArchivoDestino);
+                        File.Copy(expedienteConInforme.RutaWindream, destinoArchivo, true);
+                        DocIdsCopiados.Add(expedienteConInforme.DocID);
+                        facturaInfo.Documentos.Add(new DocumentoInfo
+                        {
+                            TipoDocumento = "Informe",
+                            NombreArchivo = nombreArchivoDestino,
+                            RutaRelativa = Path.Combine(numeroFactura, nombreArchivoDestino).Replace("\\", "/")
+                        });
+                        contadorInforme++;
+                    }
+                    else
+                    {
+                        MessageBox.Show($"El archivo no existe: {expedienteConInforme.RutaWindream}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+
+                facturasProcesadas.Add(facturaInfo);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo procesar la factura {numeroFactura}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
         private async Task GenerarIndexHtmlAsync()
         {
             string rutaPlantilla = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "index_template.html");
@@ -336,6 +440,7 @@ namespace GestorRemesasWpf.ViewModels
 
             // Generar las filas de la tabla
             StringBuilder filasTabla = new StringBuilder();
+            decimal totalImporte = 0;
 
             foreach (var factura in facturasProcesadas)
             {
@@ -347,6 +452,7 @@ namespace GestorRemesasWpf.ViewModels
                 filasTabla.AppendLine($"<td>{factura.NifMutua}</td>");
                 filasTabla.AppendLine($"<td>{factura.NombrePaciente}</td>");
                 filasTabla.AppendLine($"<td>{factura.DNIPaciente}</td>");
+                filasTabla.AppendLine($"<td>{factura.ImporteFactura}</td>");
 
                 // Generar los enlaces a los documentos
                 filasTabla.AppendLine("<td>");
@@ -357,10 +463,13 @@ namespace GestorRemesasWpf.ViewModels
                 filasTabla.AppendLine("</td>");
 
                 filasTabla.AppendLine("</tr>");
+
+                totalImporte += factura.ImporteFactura;
             }
 
             // Reemplazar el marcador de posición en la plantilla
             string contenidoHtml = plantillaHtml.Replace("{{TABLE_ROWS}}", filasTabla.ToString());
+            contenidoHtml = contenidoHtml.Replace("{{IMPORTE_TOTAL}}", totalImporte.ToString("C")); // Importe total
 
             // Guardar el archivo index.html
             await File.WriteAllTextAsync(rutaIndexHtml, contenidoHtml);

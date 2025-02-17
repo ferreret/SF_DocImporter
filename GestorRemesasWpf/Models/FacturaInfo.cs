@@ -16,6 +16,7 @@ namespace GestorRemesasWpf.Models
         public string? NombrePaciente { get; set; }
         public string? DNIPaciente { get; set; }
         public List<DocumentoInfo> Documentos { get; set; } = new List<DocumentoInfo>();
+        public decimal ImporteFactura { get; set; }
     }
 
     public class DocumentoInfo

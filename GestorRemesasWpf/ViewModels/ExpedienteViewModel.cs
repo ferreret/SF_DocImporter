@@ -542,9 +542,9 @@ namespace GestorRemesasWpf.ViewModels
             FiltrarExpedientes();
         }
 
-        private List<string> ExtraerFacturas(string filePath)
+        private List<(string NumeroFactura, decimal ImporteFactura)> ExtraerFacturas(string filePath)
         {
-            var facturas = new List<string>();
+            var facturas = new List<(string NumeroFactura, decimal ImporteFactura)>();
 
             // Asegurarse de que el archivo exista
             if (!File.Exists(filePath))
@@ -570,14 +570,16 @@ namespace GestorRemesasWpf.ViewModels
                 string[] columns = line.Split(';');
 
                 // Verificar si hay suficientes columnas
-                if (columns.Length > 0)
+                if (columns.Length > 3)
                 {
                     string numeroFactura = columns[0].Trim();
-
-                    // Comprobar que el número de factura empieza por "MSF"
-                    if (numeroFactura.StartsWith("MSF", StringComparison.OrdinalIgnoreCase))
+                    if (decimal.TryParse(columns[3].Trim(), out decimal importeFactura))
                     {
-                        facturas.Add(numeroFactura);
+                        // Comprobar que el número de factura empieza por "MSF"
+                        if (numeroFactura.StartsWith("MSF", StringComparison.OrdinalIgnoreCase))
+                        {
+                            facturas.Add((numeroFactura, importeFactura));
+                        }
                     }
                 }
             }
@@ -598,10 +600,23 @@ namespace GestorRemesasWpf.ViewModels
                 {
                     IsBusy = true;
 
-                    FacturasCargadas = ExtraerFacturas(openFileDialog.FileName);
+                    //FacturasCargadas = ExtraerFacturas(openFileDialog.FileName);
+                    var facturasCargadas = ExtraerFacturas(openFileDialog.FileName);
+                    FacturasCargadas = facturasCargadas.Select(f => f.NumeroFactura).ToList();
 
                     NombreArchivo = openFileDialog.FileName;
                     ColorMensajeArchivo = Brushes.Black;
+
+                    // Asignar el importe de la factura a los expedientes correspondientes
+                    foreach (var expediente in _expedientes)
+                    {
+                        var factura = facturasCargadas.FirstOrDefault(f => f.NumeroFactura == expediente.NoFactura);
+                        if (factura != default)
+                        {
+                            expediente.ImporteFactura = factura.ImporteFactura;
+                        }
+                    }
+
                     CalcularIsFacturaCargada();
                     FiltrarExpedientes();
                     IsBusy = false;
