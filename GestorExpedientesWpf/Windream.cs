@@ -98,7 +98,7 @@ namespace GestorExpedientesWpf
                     Expediente expediente = new Expediente
                     {
                         DocID = (int)documento!,
-                        RutaWindream = unidadRed + ":" + document.aPath,
+                        RutaWindream = unidadRed.Trim().Length == 0 ? @"\\Windream\Objects\" + document.aPath : unidadRed + ":" + document.aPath,
                         NoAutorizacion = document.GetVariableValue("NoAutorizacion")?.ToString() ?? string.Empty,
                         FechaCreacion = document.GetVariableValue("DMS Created") != null ? (DateTime)document.GetVariableValue("DMS Created") : DateTime.MinValue,
                         Cobertura = document.GetVariableValue("Cobertura")?.ToString() ?? string.Empty,
