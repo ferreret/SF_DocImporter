@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Vintasoft.Imaging">
+      <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET 14.0\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.dll</HintPath>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Drawing.SkiaSharp">
+      <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET 14.0\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Drawing.SkiaSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Vintasoft.Imaging.Pdf">
+      <HintPath>..\..\..\..\..\Program Files (x86)\VintaSoft\Imaging .NET 14.0\Bin-Registered\DotNet8\AnyCPU\Vintasoft.Imaging.Pdf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

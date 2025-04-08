@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Presentation;
 using GestorRemesasWpf.Models;
+using LibUtil;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -106,6 +107,10 @@ namespace GestorRemesasWpf.ViewModels
                 {
                     await Task.Run(() => ProcesarNumeroFacturaSanitas(numeroFactura));
                 }
+                else if (TipoExportacion.ToString().EndsWith("Asisa"))
+                {
+                    await Task.Run(() => ProcesarNumeroFacturaAsisa(numeroFactura));
+                }
                 else
                 {
                     await Task.Run(() => ProcesarNumeroFacturaGeneral(numeroFactura));
@@ -126,6 +131,98 @@ namespace GestorRemesasWpf.ViewModels
 
             MessageBox.Show("Fin del proceso de creación de la remesa.", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        private void ProcesarNumeroFacturaAsisa(string numeroFactura)
+        {
+            try
+            {
+                string subcarpetaFactura = Path.Combine(CarpetaDestino, Remesa);
+                if (!Directory.Exists(subcarpetaFactura))
+                {
+                    Directory.CreateDirectory(subcarpetaFactura);
+                }
+
+                var expedienteConFactura = ExpedientesFiltrados.FirstOrDefault(
+                    expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Factura");
+
+                var facturaInfo = new FacturaInfo
+                {
+                    NumeroFactura = numeroFactura,
+                    FechaFactura = expedienteConFactura?.FechaFactura ?? DateTime.MinValue,
+                    NoAutorizacion = expedienteConFactura?.NoAutorizacion ?? string.Empty,
+                    Cobertura = expedienteConFactura?.Cobertura ?? string.Empty,
+                    NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
+                    NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
+                    DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                };
+
+                // Lista para almacenar temporalmente los archivos PDF que se van a unir
+                List<string> archivosAUnir = new List<string>();
+                string archivoFinal = Path.Combine(subcarpetaFactura, $"{numeroFactura}.pdf");
+                
+                // Primero agregamos la factura
+                if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
+                {
+                    archivosAUnir.Add(expedienteConFactura.RutaWindream);
+                    DocIdsCopiados.Add(expedienteConFactura.DocID);
+                }
+
+                // Luego agregamos la autorización
+                var expedienteConAutorizacion = ExpedientesTotales.FirstOrDefault(
+                    expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Autorización");
+
+                if (expedienteConAutorizacion != null && File.Exists(expedienteConAutorizacion.RutaWindream))
+                {
+                    archivosAUnir.Add(expedienteConAutorizacion.RutaWindream);
+                    DocIdsCopiados.Add(expedienteConAutorizacion.DocID);
+                }
+
+                // Finalmente agregamos los informes
+                var expedientesConInforme = ExpedientesTotales.Where(
+                    expediente => expediente.NoFactura == numeroFactura && expediente.TipoDoc == "Informe").ToList();
+
+                foreach (var expedienteConInforme in expedientesConInforme)
+                {
+                    if (File.Exists(expedienteConInforme.RutaWindream))
+                    {
+                        archivosAUnir.Add(expedienteConInforme.RutaWindream);
+                        DocIdsCopiados.Add(expedienteConInforme.DocID);
+                    }
+                }
+
+                var pdfUtil = new PdfUtil();
+
+                // Si tenemos archivos para unir, procedemos
+                if (archivosAUnir.Count > 0)
+                {
+                    // Creamos el primer archivo PDF
+                    File.Copy(archivosAUnir[0], archivoFinal, true);
+
+                    // Unimos el resto de archivos
+                    for (int i = 1; i < archivosAUnir.Count; i++)
+                    {
+                        pdfUtil.CopyPagesFromOnePdfDocumentToAnother(archivosAUnir[i], archivoFinal);
+                    }
+
+                    // Agregamos la información del documento para el índice HTML
+                    facturaInfo.Documentos.Add(new DocumentoInfo
+                    {
+                        TipoDocumento = "Documentación completa",
+                        NombreArchivo = Path.GetFileName(archivoFinal),
+                        RutaRelativa = Path.GetFileName(archivoFinal).Replace("\\", "/")
+                    });
+                }
+
+                facturasProcesadas.Add(facturaInfo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"No se pudo procesar la factura {numeroFactura}: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
 
         private void ProcesarNumeroFactura(string numeroFactura)
         {

@@ -42,8 +42,9 @@
             <ComboBox x:Name="comboTipoExportacion" Margin="10, 0, 10, 10" FontSize="14"
                       SelectedItem="{Binding TipoExportacion, Mode=TwoWay}" BorderBrush="{StaticResource SecondaryColor}">
                 <ComboBoxItem Content="Adeslas" />
-                <ComboBoxItem Content="Sanitas" />
+                <ComboBoxItem Content="Asisa" />
                 <ComboBoxItem Content="Factura" />
+                <ComboBoxItem Content="Sanitas" />
             </ComboBox>
 
             <!-- Barra de Progreso -->

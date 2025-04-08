@@ -27,11 +27,15 @@ namespace LibDataExtractor
             ImagingGlobalSettings.RegisterImaging(
                 "Nicolas Barcelo Lozano",
                 "barcelo@oficinasinpapel.com",
-                "QG0v2N4jWvCrmNlwRDqIol0GhT9g89ZdLw5rz/pfapytcsnPhwUrxiHoj5IOgsGzCaZiKEEgZ0InkrDpw0LSGPKVBBzzFR5PgbfyetXMO7Jx+Kse1jwSVZ9IW8gZAfcmQYoAKTkMAdfFKFYyIaR3S4wHT7xgCcF4q56ilfN8nZyA"
+                "YyZM2dTLIZ2gb/pLsjyiBINVbn5VRJ6rZzD7ldgdS3rC6fbvkPu1n4Bfcbp5b6E8kHarQaWWEzknYnmRp73SOYaoQ3ek4kLpH0ziF9phJVVs4h6/eJRCcnXKJQnxO3inFClB1LoX3w27eg5yEfnNrTIlTnuYYwPwWr4y7gKIpckg"
             );
 
             ImagingGlobalSettings.RegisterPdfReader(
-              "K81FF2uRBF13BM2Mw9b72FZGQim2hCYHFoxFHUKNG87Q+lLS9jg5GTR9fnWv7yzmCwaE0yBFMBowy9oqFXah2tqjVvnlnvSALfhUDhRTLs3HBGtlRpxE/8ftehITmgsl6zVyuqsMMpsjVIqPEZGDZUgzO6OJZ76QoKmt+jLD4mJA"
+              "Lbnsk1dyRewTfBuu6P1R/ea6jv3XzaRe1KJzxXw+4OrWBlffhoz+7vGK/1QucbLeKwfMy0oucklwKm2e0BMjIWC16YCpdkeJQB5f1EbGhDlxocmUPnE0jzjuwtQxoHZ893vLIbWgOf48Y6emRaMHyVo/80wKdzsQNP0YAWNmWQY0"
+            );
+
+            ImagingGlobalSettings.RegisterPdfWriter(
+              "Xekaol5hnQDM9hve28G1UCxQzpIu731h7ApOzPcQOIPWXXVSn+HEoDcee0DNZgJFCN5PWuoR1DTqEJfRRYo98pe150CKJXJ88a9J1UzER0pR9/ULMcG6iPIExWOGgTlkMZLAa+PyyjKRXWR9ODh273bTxArt9a+3wQx+OeT3XBKU"
             );
 
             Vintasoft.Imaging.Drawing.SkiaSharp.SkiaSharpDrawingFactory.SetAsDefault();
