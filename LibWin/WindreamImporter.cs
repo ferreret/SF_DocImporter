@@ -626,6 +626,13 @@ namespace LibWin
             }
 
             // Busco la factura con el mismo número de autorización, para actualizar indices
+            // Si no tengo el número de autorización, no puedo buscar la factura
+            if (string.IsNullOrEmpty(windreamIndexes.NoAutorizacion))
+            {
+                _fileLogger.LogError("No se ha especificado el número de autorización en el documento.");
+                return document.aName;
+            }
+
             WindreamIndexes? windreamIndexesFactura = GetWindreamIndexesFromFactura(windreamIndexes.NoAutorizacion!, objectType);
 
             if (windreamIndexesFactura != null)
