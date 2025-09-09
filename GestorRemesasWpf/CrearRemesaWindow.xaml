@@ -44,6 +44,7 @@
                 <ComboBoxItem Content="Adeslas" />
                 <ComboBoxItem Content="Asisa" />
                 <ComboBoxItem Content="Factura" />
+                <ComboBoxItem Content="Mapfre" />
                 <ComboBoxItem Content="Sanitas" />
             </ComboBox>
 
