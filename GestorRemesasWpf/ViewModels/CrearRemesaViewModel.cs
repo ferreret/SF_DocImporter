@@ -109,7 +109,8 @@ namespace GestorRemesasWpf.ViewModels
                 }
                 else if (TipoExportacion.ToString().EndsWith("Asisa"))
                 {
-                    await Task.Run(() => ProcesarNumeroFacturaAsisa(numeroFactura));
+                    //await Task.Run(() => ProcesarNumeroFacturaAsisa(numeroFactura));
+                    await Task.Run(() => ProcesarNumeroFacturaMapfre(numeroFactura));
                 }
                 else if (TipoExportacion.ToString().EndsWith("Mapfre"))
                 {
