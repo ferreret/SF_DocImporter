@@ -15,6 +15,8 @@ namespace LibUtil.Models
         public string? FechaFactura { get; set; }
         public string? NoFactura { get; set; }
         public string? CIFMutua { get; set; }
+        public string? NoActo { get; set; }
+        public string? FechaActo { get; set; }
 
         public override string ToString()
         {
@@ -25,7 +27,9 @@ namespace LibUtil.Models
                    $"DNIPaciente: {DNIPaciente}\n" +
                    $"FechaFactura: {FechaFactura}\n" +
                    $"NoFactura: {NoFactura}\n" +
-                   $"CIFMutua: {CIFMutua}";
+                   $"CIFMutua: {CIFMutua}\n" + 
+                   $"NoActo: {NoActo}\n" + 
+                   $"FechaActo: {FechaActo}";
         }
     }
 }

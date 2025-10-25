@@ -10,6 +10,8 @@ namespace GestorRemesasWpf.Models
     {
         public string? NumeroFactura { get; set; }
         public DateTime FechaFactura { get; set; }
+        public string? NumeroActo { get; set; }
+        public DateTime FechaActo { get; set; }
         public string? NoAutorizacion { get; set; }
         public string? Cobertura { get; set; }
         public string? NifMutua { get; set; }

@@ -270,6 +270,17 @@ namespace LibWin
                 document.AddHistory($"FechaFactura: {windreamIndexes.FechaFactura}");
             }
 
+            if (windreamIndexes.FechaActo.HasValue)
+            {
+                document.SetVariableValue("FechaActo", windreamIndexes.FechaActo);
+                document.AddHistory($"FechaActo: {windreamIndexes.FechaActo}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NoActo))
+            {
+                document.SetVariableValue("NoActo", windreamIndexes.NoActo);
+                document.AddHistory($"NoActo: {windreamIndexes.NoActo}");
+            }
         }
 
         // --------------------------------------------------------------------------------------------------------------------------------------
@@ -530,6 +541,18 @@ namespace LibWin
                 document.SetVariableValue("TipoDoc", windreamIndexes.TipoDoc.ToString());
                 document.AddHistory($"TipoDoc: {windreamIndexes.TipoDoc}");
             }
+
+            if (windreamIndexes.FechaActo.HasValue)
+            {
+                document.SetVariableValue("FechaActo", windreamIndexes.FechaActo);
+                document.AddHistory($"FechaActo: {windreamIndexes.FechaActo}");
+            }
+
+            if (!string.IsNullOrEmpty(windreamIndexes.NoActo))
+            {
+                document.SetVariableValue("NoActo", windreamIndexes.NoActo);
+                document.AddHistory($"NoActo: {windreamIndexes.NoActo}");
+            }
         }
 
 
@@ -673,7 +696,9 @@ namespace LibWin
                         NIFMutua = document.GetVariableValue("NIFMutua") as string,
                         NombrePaciente = document.GetVariableValue("NombrePaciente") as string,
                         DNIPaciente = document.GetVariableValue("DNIPaciente") as string,
-                        FechaFactura = document.GetVariableValue("FechaFactura") as DateTime?
+                        FechaFactura = document.GetVariableValue("FechaFactura") as DateTime?,
+                        FechaActo = document.GetVariableValue("FechaActo") as DateTime?,
+                        NoActo = document.GetVariableValue("NoActo") as string
                     };
 
                     return windreamIndexes;

@@ -111,6 +111,25 @@ namespace LibDataExtractor
                 }
             }
 
+            // Fecha Acto y Número de Acto
+            // Cogemos el texto a partir de número de factura
+            string textoDesdeNoFactura = fullText.Substring(match.Index);
+
+            var fechaActoMatches = Regex.Matches(textoDesdeNoFactura, @"\d{1,2}/\d{1,2}/\d{4}");
+
+            // El primer matche es la fecha de acto
+            if (fechaActoMatches.Count > 0)
+            {
+                factura.FechaActo = fechaActoMatches[0].Value;
+            }
+
+            // La primera cadena de 3 a 10 dígitos después de la fecha de acto es el número de acto
+            var numeroActoMatch = Regex.Match(textoDesdeNoFactura.Substring(fechaActoMatches[0].Index + fechaActoMatches[0].Length), @"\d{3,10}");
+            if (numeroActoMatch.Success)
+            {
+                factura.NoActo = numeroActoMatch.Value;
+            }
+
             // NoAutorizacion y NIF Mutua
             string lineaAutorizacion = VSUtil.GetTextFromAnchorText(pathPdf, 0, "Autorización:", false);
 
@@ -163,6 +182,16 @@ namespace LibDataExtractor
                 else
                 {
                     _fileLogger.LogError("Error al parsear la fecha de la factura.");
+                }
+
+                windreamIndexes.NoActo = factura.NoActo is null ? String.Empty : factura.NoActo.RemoveCarriageReturns();
+                if (DateTime.TryParse(factura.FechaActo, out DateTime fechaActo))
+                {
+                    windreamIndexes.FechaActo = fechaActo;
+                }
+                else
+                {
+                    _fileLogger.LogError("Error al parsear la fecha del acto.");
                 }
             }
 

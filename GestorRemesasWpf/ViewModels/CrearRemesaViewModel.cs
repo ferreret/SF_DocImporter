@@ -159,7 +159,10 @@ namespace GestorRemesasWpf.ViewModels
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
                     DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
-                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0,
+                    FechaActo = expedienteConFactura?.FechaActo ?? DateTime.MinValue,
+                    NumeroActo = expedienteConFactura?.NoActo ?? string.Empty
+
                 };
 
                 // Lista para almacenar temporalmente los archivos PDF que se van a unir
@@ -250,7 +253,9 @@ namespace GestorRemesasWpf.ViewModels
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
                     DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
-                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0,
+                    FechaActo = expedienteConFactura?.FechaActo ?? DateTime.MinValue,
+                    NumeroActo = expedienteConFactura?.NoActo ?? string.Empty
                 };
 
                 // Lista para almacenar temporalmente los archivos PDF que se van a unir
@@ -341,7 +346,9 @@ namespace GestorRemesasWpf.ViewModels
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
                     DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
-                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0,
+                    FechaActo = expedienteConFactura?.FechaActo ?? DateTime.MinValue,
+                    NumeroActo = expedienteConFactura?.NoActo ?? string.Empty
                 };
 
                 if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
@@ -443,7 +450,9 @@ namespace GestorRemesasWpf.ViewModels
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
                     DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
-                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0,
+                    FechaActo = expedienteConFactura?.FechaActo ?? DateTime.MinValue,
+                    NumeroActo = expedienteConFactura?.NoActo ?? string.Empty
                 };
 
                 if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
@@ -540,7 +549,9 @@ namespace GestorRemesasWpf.ViewModels
                     NifMutua = expedienteConFactura?.NIFMutua ?? string.Empty,
                     NombrePaciente = expedienteConFactura?.NombrePaciente ?? string.Empty,
                     DNIPaciente = expedienteConFactura?.DNIPaciente ?? string.Empty,
-                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0
+                    ImporteFactura = expedienteConFactura?.ImporteFactura ?? 0,
+                    FechaActo = expedienteConFactura?.FechaActo ?? DateTime.MinValue,
+                    NumeroActo = expedienteConFactura?.NoActo ?? string.Empty
                 };
 
                 if (expedienteConFactura != null && File.Exists(expedienteConFactura.RutaWindream))
@@ -639,6 +650,8 @@ namespace GestorRemesasWpf.ViewModels
                 filasTabla.AppendLine("<tr>");
                 filasTabla.AppendLine($"<td>{factura.NumeroFactura}</td>");
                 filasTabla.AppendLine($"<td>{factura.FechaFactura:dd/MM/yyyy}</td>");
+                filasTabla.AppendLine($"<td>{factura.NumeroActo}</td>");
+                filasTabla.AppendLine($"<td>{factura.FechaActo:dd/MM/yyyy}</td>");
                 filasTabla.AppendLine($"<td>{factura.NoAutorizacion}</td>");
                 filasTabla.AppendLine($"<td>{factura.Cobertura}</td>");
                 filasTabla.AppendLine($"<td>{factura.NifMutua}</td>");

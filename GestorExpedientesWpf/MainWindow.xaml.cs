@@ -135,5 +135,10 @@ namespace GestorExpedientesWpf
             lstMutuas.ItemsSource = resultadosFiltrados;
             popupMutuas.IsOpen = true;
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

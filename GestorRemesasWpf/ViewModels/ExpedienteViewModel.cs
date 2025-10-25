@@ -328,15 +328,17 @@ namespace GestorRemesasWpf.ViewModels
                         worksheet.Cell(1, 8).Value = "DNIPaciente";
                         worksheet.Cell(1, 9).Value = "FechaFactura";
                         worksheet.Cell(1, 10).Value = "NoFactura";
-                        worksheet.Cell(1, 11).Value = "Remesa";
-                        worksheet.Cell(1, 12).Value = "CoberturaInforme";
-                        worksheet.Cell(1, 13).Value = "TipoDoc";
-                        worksheet.Cell(1, 14).Value = "IsOrphan";
-                        worksheet.Cell(1, 15).Value = "EsFacturaCargada";
-                        worksheet.Cell(1, 16).Value = "EsFacturaOrphan";
-                        worksheet.Cell(1, 17).Value = "EsFacturaInvalida";
-                        worksheet.Cell(1, 18).Value = "FaltaInforme";
-                        worksheet.Cell(1, 19).Value = "FaltaAutorizacion";
+                        worksheet.Cell(1, 11).Value = "FechaActo";
+                        worksheet.Cell(1, 12).Value = "NoActo";
+                        worksheet.Cell(1, 13).Value = "Remesa";
+                        worksheet.Cell(1, 14).Value = "CoberturaInforme";
+                        worksheet.Cell(1, 15).Value = "TipoDoc";
+                        worksheet.Cell(1, 16).Value = "IsOrphan";
+                        worksheet.Cell(1, 17).Value = "EsFacturaCargada";
+                        worksheet.Cell(1, 18).Value = "EsFacturaOrphan";
+                        worksheet.Cell(1, 19).Value = "EsFacturaInvalida";
+                        worksheet.Cell(1, 20).Value = "FaltaInforme";
+                        worksheet.Cell(1, 21).Value = "FaltaAutorizacion";
 
                         int row = 2;
                         foreach (Expediente expediente in ExpedientesFiltrados)
@@ -351,30 +353,32 @@ namespace GestorRemesasWpf.ViewModels
                             worksheet.Cell(row, 8).Value = expediente.DNIPaciente;
                             worksheet.Cell(row, 9).Value = expediente.FechaFactura;
                             worksheet.Cell(row, 10).Value = expediente.NoFactura;
-                            worksheet.Cell(row, 11).Value = expediente.Remesa;
-                            worksheet.Cell(row, 12).Value = expediente.CoberturaInforme;
-                            worksheet.Cell(row, 13).Value = expediente.TipoDoc;
-                            worksheet.Cell(row, 14).Value = expediente.IsOrphan;
-                            worksheet.Cell(row, 15).Value = expediente.EsFacturaCargada;
-                            worksheet.Cell(row, 16).Value = expediente.EsFacturaOrphan;
-                            worksheet.Cell(row, 17).Value = expediente.EsFacturaInvalida;
-                            worksheet.Cell(row, 18).Value = expediente.FaltaInforme;
-                            worksheet.Cell(row, 19).Value = expediente.FaltaAutorizacion;
+                            worksheet.Cell(row, 11).Value = expediente.FechaActo;
+                            worksheet.Cell(row, 12).Value = expediente.NoActo;
+                            worksheet.Cell(row, 13).Value = expediente.Remesa;
+                            worksheet.Cell(row, 14).Value = expediente.CoberturaInforme;
+                            worksheet.Cell(row, 15).Value = expediente.TipoDoc;
+                            worksheet.Cell(row, 16).Value = expediente.IsOrphan;
+                            worksheet.Cell(row, 17).Value = expediente.EsFacturaCargada;
+                            worksheet.Cell(row, 18).Value = expediente.EsFacturaOrphan;
+                            worksheet.Cell(row, 19).Value = expediente.EsFacturaInvalida;
+                            worksheet.Cell(row, 20).Value = expediente.FaltaInforme;
+                            worksheet.Cell(row, 21).Value = expediente.FaltaAutorizacion;
 
                             // Aplicar colores basados en las condiciones del XAML
                             switch (expediente.TipoDoc)
                             {
                                 case "Autorización":
-                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#dc3545");
-                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    worksheet.Cell(row, 15).Style.Font.FontColor = XLColor.FromHtml("#dc3545");
+                                    worksheet.Cell(row, 15).Style.Font.Bold = true;
                                     break;
                                 case "Informe":
-                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#007bff");
-                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    worksheet.Cell(row, 15).Style.Font.FontColor = XLColor.FromHtml("#007bff");
+                                    worksheet.Cell(row, 15).Style.Font.Bold = true;
                                     break;
                                 case "Factura":
-                                    worksheet.Cell(row, 13).Style.Font.FontColor = XLColor.FromHtml("#28a745");
-                                    worksheet.Cell(row, 13).Style.Font.Bold = true;
+                                    worksheet.Cell(row, 15).Style.Font.FontColor = XLColor.FromHtml("#28a745");
+                                    worksheet.Cell(row, 15).Style.Font.Bold = true;
                                     break;
                             }
 
@@ -402,8 +406,8 @@ namespace GestorRemesasWpf.ViewModels
                             }
                             if (expediente.EsFacturaSinInforme)
                             {
-                                worksheet.Cell(row, 12).Style.Fill.BackgroundColor = XLColor.FromHtml("#ffc107");
-                                worksheet.Cell(row, 12).Style.Font.Bold = true;
+                                worksheet.Cell(row, 14).Style.Fill.BackgroundColor = XLColor.FromHtml("#ffc107");
+                                worksheet.Cell(row, 14).Style.Font.Bold = true;
                             }
 
                             row++;

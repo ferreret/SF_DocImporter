@@ -431,6 +431,8 @@ namespace GestorExpedientesWpf.ViewModels
                 EditExpediente.CoberturaInforme = factura.CoberturaInforme;
                 EditExpediente.TipoDoc = factura.TipoDoc;
                 EditExpediente.IsOrphan = factura.IsOrphan;
+                EditExpediente.NoActo = factura.NoActo;
+                EditExpediente.FechaActo = factura.FechaActo;
             }
 
             // Rellenar campos vacíos con datos del primer expediente seleccionado que tenga algún valor para ese campo específico
@@ -454,6 +456,10 @@ namespace GestorExpedientesWpf.ViewModels
                     EditExpediente.Remesa = expediente.Remesa;
                 if (string.IsNullOrEmpty(EditExpediente.CoberturaInforme))
                     EditExpediente.CoberturaInforme = expediente.CoberturaInforme;
+                if (string.IsNullOrEmpty(EditExpediente.NoActo))
+                    EditExpediente.NoActo = expediente.NoActo;  
+                if (EditExpediente.FechaActo == DateTime.MinValue)
+                    EditExpediente.FechaActo = expediente.FechaActo;
             }
 
             // Entramos en modo edición de metadatos

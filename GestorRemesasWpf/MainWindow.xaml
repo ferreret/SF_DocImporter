@@ -219,6 +219,8 @@
                         <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}" />
                         <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" />
                         <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat={}{0:dd/MM/yyyy}}" />
+                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat={}{0:dd/MM/yyyy}}" />
+                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" />
                         <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" CellStyle="{StaticResource NoAutorizacionCellStyle}" />
                         <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat={}{0:dd/MM/yyyy}}" />
                         <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" />

@@ -24,6 +24,9 @@ namespace GestorExpedientesWpf.Models
         private string? _tipoDoc;
         private bool _isOrphan;
 
+        private DateTime _fechaActo;
+        private string? _noActo;
+
         public int DocID
         {
             get => _docID;
@@ -114,6 +117,27 @@ namespace GestorExpedientesWpf.Models
                 OnPropertyChanged(nameof(NoFactura));
             }
         }
+
+        public DateTime FechaActo
+        {
+            get => _fechaActo;
+            set
+            {
+                _fechaActo = value;
+                OnPropertyChanged(nameof(FechaActo));
+            }
+        }
+
+        public string NoActo
+        {
+            get => _noActo ?? string.Empty;
+            set
+            {
+                _noActo = value;
+                OnPropertyChanged(nameof(NoActo));
+            }
+        }
+
         public string Remesa
         {
             get => _remesa ?? string.Empty;

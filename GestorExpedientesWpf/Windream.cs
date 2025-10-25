@@ -110,6 +110,8 @@ namespace GestorExpedientesWpf
                         Remesa = document.GetVariableValue("Remesa")?.ToString() ?? string.Empty,
                         CoberturaInforme = document.GetVariableValue("CoberturaInforme")?.ToString() ?? string.Empty,
                         TipoDoc = document.GetVariableValue("TipoDoc")?.ToString() ?? string.Empty,
+                        FechaActo = document.GetVariableValue("FechaActo") != null ? (DateTime)document.GetVariableValue("FechaActo") : DateTime.MinValue,
+                        NoActo = document.GetVariableValue("NoActo")?.ToString() ?? string.Empty,
                         IsOrphan = false
                     };
 
@@ -252,6 +254,10 @@ namespace GestorExpedientesWpf
                     document.AddHistory($"Remesa: {expediente.Remesa} -> {editExpediente.Remesa}");
                     document.SetVariableValue("CoberturaInforme", editExpediente.CoberturaInforme);
                     document.AddHistory($"CoberturaInforme: {expediente.CoberturaInforme} -> {editExpediente.CoberturaInforme}");
+                    document.AddHistory($"FechaActo: {expediente.FechaActo} -> {editExpediente.FechaActo}");
+                    document.SetVariableValue("FechaActo", editExpediente.FechaActo);
+                    document.AddHistory($"NoActo: {expediente.NoActo} -> {editExpediente.NoActo}");
+                    document.SetVariableValue("NoActo", editExpediente.NoActo);
 
                     document.Save();
                     document.unlock();

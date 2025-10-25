@@ -18,11 +18,24 @@ namespace LibUtil.Models
         public string? Remesa { get; set; }
         public string? CoberturaInforme { get; set; }
         public TipoDocumento? TipoDoc { get; set; }
+        public string? NoActo { get; set; }
+        public DateTime? FechaActo { get; set; }
 
         // Override ToString method to return a string representation of the object
         public override string ToString()
         {
-            return $"NoAutorizacion: {NoAutorizacion}, Cobertura: {Cobertura}, NIFMutua: {NIFMutua}, NombrePaciente: {NombrePaciente}, DNIPaciente: {DNIPaciente}, FechaFactura: {FechaFactura}, NoFactura: {NoFactura}, Remesa: {Remesa}, CoberturaInforme: {CoberturaInforme}, TipoDoc: {TipoDoc}";
+            return $"NoAutorizacion: {NoAutorizacion}, " +
+                   $"Cobertura: {Cobertura}, " +
+                   $"NIFMutua: {NIFMutua}, " +
+                   $"NombrePaciente: {NombrePaciente}, " +
+                   $"DNIPaciente: {DNIPaciente}, " +
+                   $"FechaFactura: {FechaFactura}, " +
+                   $"NoFactura: {NoFactura}, " +
+                   $"Remesa: {Remesa}, " +
+                   $"CoberturaInforme: {CoberturaInforme}, " +
+                   $"TipoDoc: {TipoDoc}" +
+                   $"NoActo: {NoActo}" + 
+                   $"FechaActo: {FechaActo}";
         }
     }
 

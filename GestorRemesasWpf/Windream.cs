@@ -195,8 +195,10 @@ namespace GestorRemesasWpf
                         FechaFactura = document.GetVariableValue("FechaFactura") != null ? (DateTime)document.GetVariableValue("FechaFactura") : DateTime.MinValue,
                         NoFactura = document.GetVariableValue("NoFactura")?.ToString() ?? string.Empty,
                         Remesa = document.GetVariableValue("Remesa")?.ToString() ?? string.Empty,
-                        CoberturaInforme = document.GetVariableValue("CoberturaInforme")?.ToString() ?? string.Empty,
+                        CoberturaInforme = document.GetVariableValue("CoberturaInforme")?.ToString() ?? string.Empty,                        
                         TipoDoc = document.GetVariableValue("TipoDoc")?.ToString() ?? string.Empty,
+                        FechaActo = document.GetVariableValue("FechaActo") != null ? (DateTime)document.GetVariableValue("FechaActo") : DateTime.MinValue,
+                        NoActo = document.GetVariableValue("NoActo")?.ToString() ?? string.Empty,
                         IsOrphan = false
                     };
 
