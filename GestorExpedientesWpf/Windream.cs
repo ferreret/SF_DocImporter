@@ -40,88 +40,145 @@ namespace GestorExpedientesWpf
             string? unidadRed = iniFile.ReadValue("Windream", "UnidadRed");
             string? objectTypeName = iniFile.ReadValue("Windream", "ObjectType");
 
-            // Obtenemos el tipo de documento en Windream
-            WMObject? objectType = GetDocumentType(objectTypeName);
-
-            if (objectType == null)
-            {
-                MessageBox.Show("No se encontró el tipo de documento en Windream.", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
-                return result;
-            }
-
             // Creamos un objeto de la clase WMSearch
-            WMSearch? wmSearch = _wmSession!.CreateWMSearch(WMEntity.WMEntityDocument);    
-            
-      
+            WMSearch? wmSearch = _wmSession!.CreateWMSearch(WMEntity.WMEntityDocument);
+            IWMSearch4 wmSearch4 = (IWMSearch4)wmSearch;
+
+            // Aplicamos filtro de fechas si procede
             if (filtroFecha)
             {
-                wmSearch.AddSearchTerm("DMS Created", fechaInicio, WMSearchOperator.WMSearchOperatorGreaterEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
-                wmSearch.AddSearchTerm("DMS Created", fechaFin, WMSearchOperator.WMSearchOperatorLesserEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
+                wmSearch4.AddSearchTerm("DMS Created", fechaInicio, WMSearchOperator.WMSearchOperatorGreaterEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
+                wmSearch4.AddSearchTerm("DMS Created", fechaFin, WMSearchOperator.WMSearchOperatorLesserEqual, WMSearchRelation.WMSearchRelationAnd, 0, 0);
             }
 
-            WMObjects lobjSearchResult = wmSearch.ExecuteEx(WMSearchMode.WMSearchModeNoCount | WMSearchMode.WMSearchModeValues);
+            // Definimos las columnas a recuperar (las indicadas por el usuario)
+            object[] columnas = new object[]
+            {
+                "dwDocID",          // 0
+                "##ObjectPath##",   // 1 (ruta calculada, equivalente a .aPath)
+                "dwFlags",          // 2 (flags / estado del objeto)
+                "NoAutorizacion",   // 3
+                "DMS Created",      // 4
+                "Cobertura",        // 5
+                "NIFMutua",         // 6
+                "NombrePaciente",   // 7
+                "DNIPaciente",      // 8
+                "FechaFactura",     // 9
+                "NoFactura",        // 10
+                "Remesa",           // 11
+                "CoberturaInforme", // 12
+                "TipoDoc",          // 13
+                "FechaActo",        // 14
+                "NoActo"            // 15
+            };
 
-            ArrayList lobjListaDocuments = new();
-            string[] VariablesNames = { "szLongName", "dwDocID", "dwDocDBID" };
-            int MAXFETCHCOUNT = 100000;
-            Array ResultList;
+            IWMObjects3? searchResult3 = null;
 
             try
             {
-                ResultList = (Array)lobjSearchResult.GetValues(MAXFETCHCOUNT, 0, VariablesNames);
-                // Hacemos un bucle por cada uno
-                int upperBound = ResultList.GetUpperBound(1);
-                for (int lintContador = 0; lintContador <= upperBound; lintContador++)
-                {
-                    lobjListaDocuments.Add(ResultList.GetValue(1, lintContador));
-                }
-            }
-            catch (Exception)
-            {
-                // Si hay un error es que no hay datos para el número de petición dado
-                MessageBox.Show("No se encontraron documentos en Windream.", "Gestor Expedientes",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                return result;
-            }
+                // Ejecutamos la búsqueda en modo valores y sin contar (optimizado)
+                WMSearchMode searchMode = (WMSearchMode) (WMSearchMode.WMSearchModeValues | WMSearchMode.WMSearchModeNoCount);
+                searchResult3 = (IWMObjects3)wmSearch4.ExecuteEx(searchMode);
 
-            foreach (var documento in lobjListaDocuments)
-            {
-                try
+                int batchSize = 5000;
+                bool moreData = true;
+
+                while (moreData)
                 {
-                    WMObject document = _wmSession!.GetWMObjectById(WMEntity.WMEntityDocument, (int)documento!);
-                   
-                    if (TieneEstado(document.aWMObjectStatus, WMObjectStatus.WMObjectStatusPreVersion))
+                    object valuesObj = searchResult3.GetValues(batchSize, 0, columnas);
+                    Array values = (Array)valuesObj;
+
+                    // La matriz devuelta es [columna, fila]
+                    int filas = values.GetLength(1);
+
+                    for (int fila = 0; fila < filas; fila++)
                     {
-                        continue;
+                        try
+                        {
+                            // Extraemos las columnas por índice según el array 'columnas'
+                            object? docIdRaw = values.GetValue(0, fila);
+                            string objectPath = Convert.ToString(values.GetValue(1, fila)) ?? string.Empty;
+                            int fsStatus = values.GetValue(2, fila) != null ? Convert.ToInt32(values.GetValue(2, fila)) : 0;
+                            object? noAutorizacionRaw = values.GetValue(3, fila);
+                            object? dmsCreatedRaw = values.GetValue(4, fila);
+                            object? coberturaRaw = values.GetValue(5, fila);
+                            object? nifMutuaRaw = values.GetValue(6, fila);
+                            object? nombrePacienteRaw = values.GetValue(7, fila);
+                            object? dniPacienteRaw = values.GetValue(8, fila);
+                            object? fechaFacturaRaw = values.GetValue(9, fila);
+                            object? noFacturaRaw = values.GetValue(10, fila);
+                            object? remesaRaw = values.GetValue(11, fila);
+                            object? coberturaInformeRaw = values.GetValue(12, fila);
+                            object? tipoDocRaw = values.GetValue(13, fila);
+                            object? fechaActoRaw = values.GetValue(14, fila);
+                            object? noActoRaw = values.GetValue(15, fila);
+
+                            if (TieneEstado(fsStatus, WMObjectStatus.WMObjectStatusPreVersion))
+                            {
+                                continue;
+                            }
+
+                            int docID = docIdRaw != null ? Convert.ToInt32(docIdRaw) : 0;
+                            DateTime fechaCreacion = dmsCreatedRaw != null ? Convert.ToDateTime(dmsCreatedRaw) : DateTime.MinValue;
+                            DateTime fechaFactura = fechaFacturaRaw != null ? Convert.ToDateTime(fechaFacturaRaw) : DateTime.MinValue;
+                            DateTime fechaActo = fechaActoRaw != null ? Convert.ToDateTime(fechaActoRaw) : DateTime.MinValue;
+
+                            Expediente expediente = new Expediente
+                            {
+                                DocID = docID,
+                                RutaWindream = string.IsNullOrWhiteSpace(unidadRed)
+                                                ? @"\\Windream\Objects\" + objectPath
+                                                : unidadRed + ":" + objectPath,
+                                NoAutorizacion = noAutorizacionRaw?.ToString() ?? string.Empty,
+                                FechaCreacion = fechaCreacion,
+                                Cobertura = coberturaRaw?.ToString() ?? string.Empty,
+                                NIFMutua = nifMutuaRaw?.ToString() ?? string.Empty,
+                                NombrePaciente = nombrePacienteRaw?.ToString() ?? string.Empty,
+                                DNIPaciente = dniPacienteRaw?.ToString() ?? string.Empty,
+                                FechaFactura = fechaFactura,
+                                NoFactura = noFacturaRaw?.ToString() ?? string.Empty,
+                                Remesa = remesaRaw?.ToString() ?? string.Empty,
+                                CoberturaInforme = coberturaInformeRaw?.ToString() ?? string.Empty,
+                                TipoDoc = tipoDocRaw?.ToString() ?? string.Empty,
+                                FechaActo = fechaActo,
+                                NoActo = noActoRaw?.ToString() ?? string.Empty,
+                                IsOrphan = false
+                            };
+
+                            result.Add(expediente);
+                        }
+                        catch (Exception exRow)
+                        {
+                            // No interrumpimos la importación por una fila defectuosa
+                            MessageBox.Show(exRow.Message);
+                        }
                     }
 
-                    Expediente expediente = new Expediente
+                    // Si hemos recibido menos filas que las solicitadas, no hay más datos
+                    if (filas < batchSize)
                     {
-                        DocID = (int)documento!,
-                        RutaWindream = unidadRed.Trim().Length == 0 ? @"\\Windream\Objects\" + document.aPath : unidadRed + ":" + document.aPath,
-                        NoAutorizacion = document.GetVariableValue("NoAutorizacion")?.ToString() ?? string.Empty,
-                        FechaCreacion = document.GetVariableValue("DMS Created") != null ? (DateTime)document.GetVariableValue("DMS Created") : DateTime.MinValue,
-                        Cobertura = document.GetVariableValue("Cobertura")?.ToString() ?? string.Empty,
-                        NIFMutua = document.GetVariableValue("NIFMutua")?.ToString() ?? string.Empty,
-                        NombrePaciente = document.GetVariableValue("NombrePaciente")?.ToString() ?? string.Empty,
-                        DNIPaciente = document.GetVariableValue("DNIPaciente")?.ToString() ?? string.Empty,
-                        FechaFactura = document.GetVariableValue("FechaFactura") != null ? (DateTime)document.GetVariableValue("FechaFactura") : DateTime.MinValue,
-                        NoFactura = document.GetVariableValue("NoFactura")?.ToString() ?? string.Empty,
-                        Remesa = document.GetVariableValue("Remesa")?.ToString() ?? string.Empty,
-                        CoberturaInforme = document.GetVariableValue("CoberturaInforme")?.ToString() ?? string.Empty,
-                        TipoDoc = document.GetVariableValue("TipoDoc")?.ToString() ?? string.Empty,
-                        FechaActo = document.GetVariableValue("FechaActo") != null ? (DateTime)document.GetVariableValue("FechaActo") : DateTime.MinValue,
-                        NoActo = document.GetVariableValue("NoActo")?.ToString() ?? string.Empty,
-                        IsOrphan = false
-                    };
-
-                    result.Add(expediente);
+                        moreData = false;
+                    }
                 }
-
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error recuperando expedientes: {ex.Message}", "Gestor Expedientes", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (searchResult3 != null)
                 {
-                    // No hacemos nada
-                    MessageBox.Show(ex.Message);
+                    try
+                    {
+                        ((IWMObjects4)searchResult3).Clear();
+                    }
+                    catch { }
+                    try
+                    {
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(searchResult3);
+                    }
+                    catch { }
                 }
             }
 

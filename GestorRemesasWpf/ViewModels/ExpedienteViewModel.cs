@@ -542,8 +542,23 @@ namespace GestorRemesasWpf.ViewModels
 
         private void BorrarExpedientes()
         {
-            _expedientes.Clear();
-            FiltrarExpedientes();
+            
+            ResetExpedientes();
+
+        }
+
+        private void ResetExpedientes()
+        {
+            // Asegurar que la modificación de la colección y la creación de la CollectionView
+            // se realizan en el hilo del Dispatcher (UI) para evitar NotSupportedException.
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _expedientes = new ObservableCollection<Expediente>();
+                ExpedientesFiltrados = CollectionViewSource.GetDefaultView(_expedientes);
+                // Opcional: limpiar estado relacionado
+                FacturasCargadas?.Clear();
+                FiltrarExpedientes();
+            }, System.Windows.Threading.DispatcherPriority.Normal);
         }
 
         private List<(string NumeroFactura, decimal ImporteFactura)> ExtraerFacturas(string filePath)
