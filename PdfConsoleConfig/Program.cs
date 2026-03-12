@@ -1,8 +1,10 @@
-﻿using System.Drawing;
+using System.Drawing;
 using PdfUtil;
 using PdfUtil.Components;
 using PdfUtil.Models;
 using SkiaSharp;
+using Vintasoft.Imaging.Pdf;
+using Vintasoft.Imaging.Pdf.Tree;
 using Vintasoft.Imaging.Text;
 
 Console.WriteLine("-------------------------------------------------------------");
@@ -11,65 +13,47 @@ Console.WriteLine("-------------------------------------------------------------
 
 VintasoftConfigLoader.InitializeLicenses();
 
-// Get full text form a PDF file
-// string pdfPath = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202426971F.pdf";
-// string pdfPath2 = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427009F.pdf";
-// string pdfPath3 = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427129F.pdf";
+// Extracción de campos de informes usando anchor text
+string[] pdfPaths =
+[
+    @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202426971I.pdf",
+    @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427009I.pdf",
+    @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427129I.pdf"
+];
 
-// string templateFacturaPath = @"F:\Tecnomedia\SagradaFamilia\Proyecto\Templates\TemplateFactura.json";
+string[] anchors = ["NOMBRE:", "NIF / NIE:", "COBERTURA:", "AUTORIZACIÓN:"];
 
-// string fullText = await VSUtil.GetFullText(pdfPath);
-// Console.WriteLine(fullText);
+foreach (string pdfPath in pdfPaths)
+{
+    using PdfDocument pdfDocument = new PdfDocument(pdfPath);
+    PdfPage page = pdfDocument.Pages[0];
+    TextRegion sourceRegion = page.TextRegion;
 
-// Creación de la plantilla de factura
-// Factura? factura1 = await TemplateManagement.ApplyFacturaTemplateAsync(pdfPath, templateFacturaPath);
-// Console.WriteLine(factura1);
+    foreach (string anchor in anchors)
+    {
+        string value = GetTextFromAnchor(sourceRegion, page, anchor);
+        Console.WriteLine($"{anchor} {value}");
+    }
 
-// Factura? factura2 = await TemplateManagement.ApplyFacturaTemplateAsync(pdfPath2, templateFacturaPath);
-// Console.WriteLine(factura2);
+    Console.WriteLine("-------------------------------------------------------------");
+}
 
-// Factura? factura3 = await TemplateManagement.ApplyFacturaTemplateAsync(pdfPath3, templateFacturaPath);
-// Console.WriteLine(factura3);
+string GetTextFromAnchor(TextRegion sourceRegion, PdfPage page, string anchorText)
+{
+    int startindex = 0;
+    TextRegion textRegion = sourceRegion.FindText(anchorText, ref startindex, false);
 
-string pathPDF1 = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202426971I.pdf";
-// string pathPDF2 = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427009I.pdf";
-// string pathPDF3 = @"F:\Tecnomedia\SagradaFamilia\Muestras\Muestras 20240731\MSF202427129I.pdf";
+    if (textRegion == null)
+    {
+        Console.WriteLine($"Anchor '{anchorText}' not found");
+        return string.Empty;
+    }
 
-// var stopwatch = new System.Diagnostics.Stopwatch();
+    float x1 = textRegion.Rectangle.X + textRegion.Rectangle.Width;
+    float yMid = (textRegion.Rectangle.Y + textRegion.Rectangle.Y + textRegion.Rectangle.Height) / 2;
 
-// stopwatch.Start();
-// string fullText1 = await VSUtil.GetFullTextAsync(pathPDF1);
-// Console.WriteLine(fullText1);
-// stopwatch.Stop();
-// Console.WriteLine($"Time taken for GetFullTextAsync(pathPDF1): {stopwatch.ElapsedMilliseconds} ms");
+    RectangleF lineRect = new RectangleF(x1, yMid, page.MediaBox.Width - x1, 0);
+    TextRegion textRegionSearch = sourceRegion.GetSubregion(lineRect, TextSelectionMode.Rectangle);
 
-// stopwatch.Restart();
-// string fullText2 = await VSUtil.GetFullTextAsync(pathPDF2);
-// Console.WriteLine(fullText2);
-// stopwatch.Stop();
-// Console.WriteLine($"Time taken for GetFullTextAsync(pathPDF2): {stopwatch.ElapsedMilliseconds} ms");
-
-// stopwatch.Restart();
-// string fullText3 = await VSUtil.GetFullTextAsync(pathPDF3);
-// Console.WriteLine(fullText3);
-// stopwatch.Stop();
-// Console.WriteLine($"Time taken for GetFullTextAsync(pathPDF3): {stopwatch.ElapsedMilliseconds} ms");
-
-// TextRegion identityText = await VSUtil.FindTextOnPdfPageAsync(pathPDF1, 0, "Silvia Plana Artus", 0);
-
-// Console.WriteLine($"Left: {identityText.Rectangle.Left}, Top: {identityText.Rectangle.Top}, Width: {identityText.Rectangle.Width}, Height: {identityText.Rectangle.Height}");
-
-// TextRegion identityText2 = await VSUtil.FindTextOnPdfPageAsync(pathPDF1, 0, "O: DEU I MATA 96 7 1", 0);
-
-// Console.WriteLine($"Left: {identityText2.Rectangle.Left}, Top: {identityText2.Rectangle.Top}, Width: {identityText2.Rectangle.Width}, Height: {identityText2.Rectangle.Height}");
-
-// string nombre = await VSUtil.GetTextFromAnchorTextAsync(pathPDF1, 0, "NOMBRE:", 200, 0);
-
-// Console.WriteLine(nombre);
-
-
-TextRegion textRegion = await VSUtil.GetTextSubregionAsync(new Vintasoft.Imaging.Pdf.PdfDocument(pathPDF1), 0, new RectangleF(105.0f, 723.0f, 4.0f, 1.0f));
-Console.WriteLine(textRegion.TextContent);
-
-
-
+    return textRegionSearch.TextContent;
+}

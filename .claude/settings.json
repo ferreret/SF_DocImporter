@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.cs$'; then cd 'F:/Tecnomedia/SagradaFamilia/Proyecto' && dotnet build SF_Solution.sln --no-restore -v q 2>&1 | tail -20; fi",
+        "timeout": 30000
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '(vsconfig\\.json|mutuas\\.txt)$'; then echo 'BLOCK: Archivo sensible - vsconfig.json o mutuas.txt. Confirma con el usuario antes de editar.'; exit 1; fi"
+      }
+    ]
+  }
+}
