@@ -265,8 +265,10 @@
                             <Popup x:Name="popupMutuas"
                                    PlacementTarget="{Binding ElementName=txtMutuas}"
                                    Placement="Bottom" IsOpen="False" StaysOpen="False">
-                                <Border Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6"
-                                        Effect="{StaticResource {x:Static SystemParameters.DropShadowEffectKey}}">
+                                <Border Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="8" ShadowDepth="2" Direction="270"/>
+                                    </Border.Effect>
                                     <ListBox x:Name="lstMutuas"
                                              ItemsSource="{Binding MutuasFiltradas}"
                                              MouseDoubleClick="lstMutuas_MouseDoubleClick"
