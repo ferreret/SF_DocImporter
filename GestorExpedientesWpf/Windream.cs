@@ -119,9 +119,9 @@ namespace GestorExpedientesWpf
                             }
 
                             int docID = docIdRaw != null ? Convert.ToInt32(docIdRaw) : 0;
-                            DateTime fechaCreacion = dmsCreatedRaw != null ? Convert.ToDateTime(dmsCreatedRaw) : DateTime.MinValue;
-                            DateTime fechaFactura = fechaFacturaRaw != null ? Convert.ToDateTime(fechaFacturaRaw) : DateTime.MinValue;
-                            DateTime fechaActo = fechaActoRaw != null ? Convert.ToDateTime(fechaActoRaw) : DateTime.MinValue;
+                            DateTime fechaCreacion = dmsCreatedRaw != null && dmsCreatedRaw != DBNull.Value ? Convert.ToDateTime(dmsCreatedRaw) : DateTime.MinValue;
+                            DateTime fechaFactura = fechaFacturaRaw != null && fechaFacturaRaw != DBNull.Value ? Convert.ToDateTime(fechaFacturaRaw) : DateTime.MinValue;
+                            DateTime fechaActo = fechaActoRaw != null && fechaActoRaw != DBNull.Value ? Convert.ToDateTime(fechaActoRaw) : DateTime.MinValue;
 
                             Expediente expediente = new Expediente
                             {
