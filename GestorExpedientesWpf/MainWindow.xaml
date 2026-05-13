@@ -239,6 +239,15 @@
 
             <!-- Panel de filtros -->
             <GroupBox Header="Selección de documentos" Grid.Row="0">
+                <GroupBox.Style>
+                    <Style TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding EditMetadataMode}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </GroupBox.Style>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
