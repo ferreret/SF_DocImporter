@@ -9,7 +9,8 @@
        xmlns:converters="clr-namespace:GestorRemesasWpf.Converters"
        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
        mc:Ignorable="d"
-       Title="Gestión de remesas" MinHeight="800" MinWidth="1200"
+       Title="Gestión de remesas" MinHeight="900" MinWidth="1600"
+       WindowState="Maximized"
        Background="{StaticResource PageBgBrush}" FontFamily="Segoe UI">
 
     <Window.DataContext>
@@ -119,6 +120,7 @@
 
                     <Separator Margin="0,12,0,12" Background="{StaticResource AppBorderBrush}"/>
 
+                    <!-- Sub-fila A: Coberturas (búsqueda) -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="Coberturas:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <TextBox x:Name="txtMutuas" Width="300" VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -136,14 +138,14 @@
                                          MaxHeight="200"/>
                             </Border>
                         </Popup>
+                    </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="16,0,0,0" VerticalAlignment="Center">
-                            <RadioButton Content="Todos" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.Todos}}"/>
-                            <RadioButton Content="Sin Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.SinRemesa}}" Margin="12,0,0,0"/>
-                            <RadioButton Content="Con Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.ConRemesa}}" Margin="12,0,0,0"/>
-                        </StackPanel>
-
-                        <CheckBox Content="Solo huérfanos" IsChecked="{Binding IsOrphanFilter, Mode=TwoWay}" Margin="16,0,0,0"/>
+                    <!-- Sub-fila B: Modos de filtrado -->
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                        <RadioButton Content="Todos" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.Todos}}"/>
+                        <RadioButton Content="Sin Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.SinRemesa}}" Margin="12,0,0,0"/>
+                        <RadioButton Content="Con Remesa" GroupName="RemesaFilter" IsChecked="{Binding RemesaFilter, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:RemesaFilter.ConRemesa}}" Margin="12,0,0,0"/>
+                        <CheckBox Content="Solo huérfanos" IsChecked="{Binding IsOrphanFilter, Mode=TwoWay}" Margin="20,0,0,0"/>
                         <CheckBox Content="Solo facturas" IsChecked="{Binding IsFacturaFilter, Mode=TwoWay}" Margin="12,0,0,0"/>
                     </StackPanel>
 
@@ -163,21 +165,22 @@
             <!-- DataGrid -->
             <xctk:BusyIndicator Grid.Row="1" IsBusy="{Binding IsBusy}" BusyContent="Actualizando...">
                 <DataGrid x:Name="ExpedientesDataGrid" ItemsSource="{Binding ExpedientesFiltrados}"
-                          AutoGenerateColumns="False" Margin="0,4,0,0" CanUserAddRows="False" SelectedItem="{Binding SelectedExpediente}">
+                          AutoGenerateColumns="False" Margin="0,4,0,0" CanUserAddRows="False" SelectedItem="{Binding SelectedExpediente}"
+                          HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}"/>
-                        <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat={}{0:dd/MM/yyyy}}"/>
-                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat={}{0:dd/MM/yyyy}}"/>
-                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}"/>
-                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" CellStyle="{StaticResource NoAutorizacionCellStyle}"/>
-                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat={}{0:dd/MM/yyyy}}"/>
-                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
-                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
-                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
-                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
-                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" CellStyle="{StaticResource CodigoRemesaCellStyle}"/>
-                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" CellStyle="{StaticResource InformeCellStyle}"/>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" CellStyle="{StaticResource NoFacturaCellStyle}" Width="110"/>
+                        <DataGridTextColumn Header="Tipo Doc" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="100"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat={}{0:dd/MM/yyyy}}" Width="110"/>
+                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat={}{0:dd/MM/yyyy}}" Width="110"/>
+                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="100"/>
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" CellStyle="{StaticResource NoAutorizacionCellStyle}" Width="130"/>
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat={}{0:dd/MM/yyyy}}" Width="110"/>
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="180"/>
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="100"/>
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="100"/>
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" CellStyle="{StaticResource CodigoRemesaCellStyle}" Width="90"/>
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" CellStyle="{StaticResource InformeCellStyle}" Width="*" MinWidth="180"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </xctk:BusyIndicator>

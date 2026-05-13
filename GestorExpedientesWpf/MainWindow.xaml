@@ -9,7 +9,8 @@
         xmlns:converters="clr-namespace:GestorExpedientesWpf.Converters"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Gestión de expedientes" MinHeight="800" MinWidth="1200"
+        Title="Gestión de expedientes" MinHeight="900" MinWidth="1600"
+        WindowState="Maximized"
         Background="{StaticResource PageBgBrush}" FontFamily="Segoe UI">
 
     <Window.DataContext>
@@ -83,14 +84,10 @@
                         </GroupBox.Header>
                         <Grid Margin="10">
                             <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                                    BorderThickness="1" CornerRadius="8" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="16">
+                                    BorderThickness="1" CornerRadius="8" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    MaxWidth="1000" Padding="20">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
@@ -101,54 +98,58 @@
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*" MinWidth="240"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*" MinWidth="240"/>
                                     </Grid.ColumnDefinitions>
 
+                                    <!-- Fila 0 -->
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="No. Autorización:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="5,4" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                    <TextBox Grid.Row="0" Grid.Column="1" Margin="5,4" MinWidth="150" MaxWidth="240" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
                                              Text="{Binding EditExpediente.NoAutorizacion}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Fecha Factura:" Margin="20,8,5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="3" Margin="5,4" Width="200" HorizontalAlignment="Left" FontSize="14"
+                                                SelectedDate="{Binding EditExpediente.FechaFactura}"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Cobertura:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5,4" Width="400" Style="{StaticResource FormTextBoxStyle}"
-                                             Text="{Binding EditExpediente.Cobertura}"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="NIF Mutua:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Margin="5,4" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
-                                             Text="{Binding EditExpediente.NIFMutua}"/>
-
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Nombre Paciente:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="3" Grid.Column="1" Margin="5,4" Width="400" Style="{StaticResource FormTextBoxStyle}"
+                                    <!-- Fila 1 -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Nombre Paciente:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" Margin="5,4" MinWidth="240" MaxWidth="400" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"
                                              Text="{Binding EditExpediente.NombrePaciente}"/>
-
-                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="DNI Paciente:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="4" Grid.Column="1" Margin="5,4" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
-                                             Text="{Binding EditExpediente.DNIPaciente}"/>
-
-                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Fecha Factura:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <DatePicker Grid.Row="5" Grid.Column="1" Margin="5,4" Width="200" HorizontalAlignment="Left" FontSize="14"
-                                             SelectedDate="{Binding EditExpediente.FechaFactura}"/>
-
-                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="No. Factura:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="6" Grid.Column="1" Margin="5,4" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="No. Factura:" Margin="20,8,5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="1" Grid.Column="3" Margin="5,4" MinWidth="150" MaxWidth="240" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
                                              Text="{Binding EditExpediente.NoFactura}"/>
 
-                                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Remesa:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="7" Grid.Column="1" Margin="5,4" Width="150" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                    <!-- Fila 2 -->
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="DNI Paciente:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Margin="5,4" MinWidth="150" MaxWidth="240" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.DNIPaciente}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="2" Text="Remesa:" Margin="20,8,5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="2" Grid.Column="3" Margin="5,4" MinWidth="150" MaxWidth="240" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
                                              Text="{Binding EditExpediente.Remesa}"/>
 
-                                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Cobertura Informe:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="8" Grid.Column="1" Margin="5,4" Width="400" Style="{StaticResource FormTextBoxStyle}"
-                                             Text="{Binding EditExpediente.CoberturaInforme}"/>
+                                    <!-- Fila 3 -->
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="NIF Mutua:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="3" Grid.Column="1" Margin="5,4" MinWidth="150" MaxWidth="240" HorizontalAlignment="Left" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.NIFMutua}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="Fecha Acto:" Margin="20,8,5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <DatePicker Grid.Row="3" Grid.Column="3" Margin="5,4" Width="200" HorizontalAlignment="Left" FontSize="14"
+                                                SelectedDate="{Binding EditExpediente.FechaActo}"/>
 
-                                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Fecha Acto:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <DatePicker Grid.Row="9" Grid.Column="1" Margin="5,4" Width="200" HorizontalAlignment="Left" FontSize="14"
-                                             SelectedDate="{Binding EditExpediente.FechaActo}"/>
-
-                                    <TextBlock Grid.Row="10" Grid.Column="0" Text="No. Acto:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
-                                    <TextBox Grid.Row="10" Grid.Column="1" Margin="5,4" Width="400" Style="{StaticResource FormTextBoxStyle}"
+                                    <!-- Fila 4 -->
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Cobertura:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="4" Grid.Column="1" Margin="5,4" MinWidth="240" MaxWidth="400" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.Cobertura}"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="No. Acto:" Margin="20,8,5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="4" Grid.Column="3" Margin="5,4" MinWidth="240" MaxWidth="400" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"
                                              Text="{Binding EditExpediente.NoActo}"/>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="11" Grid.Column="1" Margin="0,12,0,0">
+                                    <!-- Fila 5: Cobertura Informe ocupa ancho completo -->
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Cobertura Informe:" Margin="5,8" VerticalAlignment="Center" Style="{StaticResource FormTextBlockStyle}"/>
+                                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Margin="5,4" MinWidth="240" MaxWidth="900" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"
+                                             Text="{Binding EditExpediente.CoberturaInforme}"/>
+
+                                    <!-- Fila 6: Botones -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Margin="0,16,0,0">
                                         <Button Content="Asignar" Command="{Binding SetMetadataCommand}" Background="{StaticResource PrimaryBrush}" Foreground="White" Margin="5" Padding="16,8"/>
                                         <Button Content="Cancelar" Command="{Binding CancelEditMetadataCommand}" Background="{StaticResource SplitterBrush}" Foreground="White" Margin="5" Padding="16,8"/>
                                     </StackPanel>
@@ -178,22 +179,23 @@
                             <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding ExpedientesView}"
                                       IsReadOnly="True" RowStyle="{StaticResource OrphanRowStyle}"
                                       MouseDoubleClick="ResultadosDataGrid_MouseDoubleClick"
-                                      SelectedItem="{Binding SelectedExpediente}">
+                                      SelectedItem="{Binding SelectedExpediente}"
+                                      HorizontalScrollBarVisibility="Auto">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
-                                    <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
-                                    <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}"/>
-                                    <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
-                                    <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
-                                    <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
-                                    <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
-                                    <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}"/>
-                                    <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
-                                    <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}"/>
-                                    <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}"/>
-                                    <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
-                                    <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
-                                    <DataGridTemplateColumn Header="Añadir">
+                                    <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="110"/>
+                                    <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="130"/>
+                                    <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}" Width="110"/>
+                                    <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="180"/>
+                                    <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="100"/>
+                                    <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="200"/>
+                                    <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="100"/>
+                                    <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="110"/>
+                                    <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="110"/>
+                                    <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="110"/>
+                                    <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="110"/>
+                                    <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="90"/>
+                                    <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="*" MinWidth="180"/>
+                                    <DataGridTemplateColumn Header="Añadir" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Button Command="{Binding DataContext.AddSeleccionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -215,19 +217,10 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="11*" MinWidth="700"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="9*" MinWidth="500"/>
         </Grid.ColumnDefinitions>
-
-        <!-- Splitter -->
-        <GridSplitter Grid.Column="0" Width="6" HorizontalAlignment="Right" Background="{StaticResource SplitterBrush}"
-                      ToolTip="Ajustar tamaño" Cursor="SizeWE">
-            <GridSplitter.Template>
-                <ControlTemplate TargetType="GridSplitter">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="3" Margin="0,8"/>
-                </ControlTemplate>
-            </GridSplitter.Template>
-        </GridSplitter>
 
         <!-- COLUMNA IZQUIERDA -->
         <Grid Grid.Column="0" Margin="16">
@@ -328,22 +321,23 @@
                 <TextBlock Text="Selección" Style="{StaticResource SectionTitle}" Grid.Row="0"/>
                 <DataGrid AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding Seleccionados}" Grid.Row="1"
                           RowStyle="{StaticResource OrphanRowStyle}" MouseDoubleClick="SeleccionadosDataGrid_MouseDoubleClick"
-                          SelectedItem="{Binding SelectedExpediente}">
+                          SelectedItem="{Binding SelectedExpediente}"
+                          HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}"/>
-                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}"/>
-                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}"/>
-                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}"/>
-                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}"/>
-                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}"/>
-                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}"/>
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}"/>
-                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}"/>
-                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}"/>
-                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}"/>
-                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}"/>
-                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}"/>
-                        <DataGridTemplateColumn Header="Quitar">
+                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="110"/>
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="130"/>
+                        <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}" Width="110"/>
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="180"/>
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="100"/>
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="100"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="110"/>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="110"/>
+                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="110"/>
+                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="110"/>
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="90"/>
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="*" MinWidth="180"/>
+                        <DataGridTemplateColumn Header="Quitar" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Button Command="{Binding DataContext.RemoveSeleccionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
@@ -374,8 +368,18 @@
             </Grid>
         </Grid>
 
+        <!-- Splitter -->
+        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="{StaticResource SplitterBrush}"
+                      ToolTip="Ajustar tamaño" Cursor="SizeWE">
+            <GridSplitter.Template>
+                <ControlTemplate TargetType="GridSplitter">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="3" Margin="0,16"/>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+
         <!-- COLUMNA DERECHA - VISOR PDF -->
-        <TabControl Grid.Column="1" Margin="8,16,16,16">
+        <TabControl Grid.Column="2" Margin="8,16,16,16">
             <TabItem Header="Visor de Documento">
                 <wv2:WebView2 Source="{Binding SelectedExpedienteUrl, Converter={StaticResource NullToDefaultUrlConverter}}"/>
             </TabItem>
