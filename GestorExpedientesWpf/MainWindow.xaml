@@ -231,7 +231,7 @@
             </Grid.RowDefinitions>
 
             <!-- Panel de filtros -->
-            <GroupBox Header="Selección de documentos" Grid.Row="0">
+            <GroupBox Header="Selección de documentos" Grid.Row="0" Padding="10,6">
                 <GroupBox.Style>
                     <Style TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
                         <Style.Triggers>
@@ -246,18 +246,18 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Vertical" Margin="0,6,0,0">
-                        <CheckBox Content="Aplicar filtro de fechas" Margin="0,5,0,0" Name="chkFechaFiltro" IsChecked="{Binding AplicarFiltroFechas}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <CheckBox Content="Aplicar filtro de fechas" Margin="0,0,16,0" Name="chkFechaFiltro" IsChecked="{Binding AplicarFiltroFechas}"/>
+                            <TextBlock Text="Desde:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaInicio}"/>
-                            <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="Hasta:" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <DatePicker Width="120" IsEnabled="{Binding ElementName=chkFechaFiltro, Path=IsChecked}" Margin="0,0,10,0" SelectedDate="{Binding FechaFin}"/>
-                            <Button Content="Actualizar" Margin="10,0,0,0" Width="100" Command="{Binding ActualizarCommand}"
+                            <Button Content="Actualizar" Margin="6,0,0,0" Width="100" Command="{Binding ActualizarCommand}"
                                     Background="{StaticResource PrimaryBrush}" Foreground="White" Click="Button_Click"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <TextBlock Text="Cobertura:" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
                             <TextBox x:Name="txtMutuas" Width="400" VerticalAlignment="Center" HorizontalAlignment="Left"
                                      Text="{Binding FiltroMutua, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -278,11 +278,8 @@
                                              MaxHeight="200"/>
                                 </Border>
                             </Popup>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
-                            <CheckBox Content="Mostrar solo documentos huérfanos" IsChecked="{Binding MostrarSoloDocumentosHuerfanos}" Margin="0,0,16,0"/>
-                            <CheckBox Content="Ignorar documentos con remesa" IsChecked="{Binding IgnorarDocumentosConRemesa}"/>
+                            <CheckBox Content="Mostrar solo documentos huérfanos" IsChecked="{Binding MostrarSoloDocumentosHuerfanos}" Margin="20,0,16,0" VerticalAlignment="Center"/>
+                            <CheckBox Content="Ignorar documentos con remesa" IsChecked="{Binding IgnorarDocumentosConRemesa}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </StackPanel>
 
