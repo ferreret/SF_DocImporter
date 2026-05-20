@@ -182,19 +182,19 @@
                                       SelectedItem="{Binding SelectedExpediente}"
                                       HorizontalScrollBarVisibility="Auto">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="110"/>
-                                    <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="130"/>
+                                    <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="130"/>
+                                    <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="140"/>
                                     <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}" Width="110"/>
-                                    <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="180"/>
-                                    <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="100"/>
-                                    <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="200"/>
-                                    <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="100"/>
-                                    <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="110"/>
-                                    <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="110"/>
-                                    <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="110"/>
-                                    <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="110"/>
-                                    <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="90"/>
-                                    <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="*" MinWidth="180"/>
+                                    <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="200"/>
+                                    <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="0"/>
+                                    <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="250"/>
+                                    <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="0"/>
+                                    <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="0"/>
+                                    <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="0"/>
+                                    <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="0"/>
+                                    <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="0"/>
+                                    <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="0"/>
+                                    <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="0"/>
                                     <DataGridTemplateColumn Header="Añadir" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -321,19 +321,19 @@
                           SelectedItem="{Binding SelectedExpediente}"
                           HorizontalScrollBarVisibility="Auto">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="110"/>
-                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="130"/>
+                        <DataGridTextColumn Header="Tipo Documento" Binding="{Binding TipoDoc}" CellStyle="{StaticResource TipoDocumentoCellStyle}" Width="130"/>
+                        <DataGridTextColumn Header="No Autorización" Binding="{Binding NoAutorizacion}" Width="140"/>
                         <DataGridTextColumn Header="Fecha Creación" Binding="{Binding FechaCreacion, StringFormat=dd/MM/yyyy}" Width="110"/>
-                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="180"/>
-                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="100"/>
-                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="200"/>
-                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="100"/>
-                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="110"/>
-                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="110"/>
-                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="110"/>
-                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="110"/>
-                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="90"/>
-                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="*" MinWidth="180"/>
+                        <DataGridTextColumn Header="Cobertura" Binding="{Binding Cobertura}" Width="*" MinWidth="200"/>
+                        <DataGridTextColumn Header="NIF Mutua" Binding="{Binding NIFMutua}" Width="0"/>
+                        <DataGridTextColumn Header="Nombre Paciente" Binding="{Binding NombrePaciente}" Width="*" MinWidth="250"/>
+                        <DataGridTextColumn Header="DNI Paciente" Binding="{Binding DNIPaciente}" Width="0"/>
+                        <DataGridTextColumn Header="Fecha Factura" Binding="{Binding FechaFactura, StringFormat=dd/MM/yyyy}" Width="0"/>
+                        <DataGridTextColumn Header="No Factura" Binding="{Binding NoFactura}" Width="0"/>
+                        <DataGridTextColumn Header="Fecha Acto" Binding="{Binding FechaActo, StringFormat=dd/MM/yyyy}" Width="0"/>
+                        <DataGridTextColumn Header="No Acto" Binding="{Binding NoActo}" Width="0"/>
+                        <DataGridTextColumn Header="Remesa" Binding="{Binding Remesa}" Width="0"/>
+                        <DataGridTextColumn Header="Cobertura Informe" Binding="{Binding CoberturaInforme}" Width="0"/>
                         <DataGridTemplateColumn Header="Quitar" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
