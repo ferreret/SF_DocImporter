@@ -37,7 +37,14 @@ namespace GestorRemesasWpf.ViewModels
         private bool _isFacturaFilter = true;
         private bool _mostrarSoloFacturasDelArchivo;
         private DataGrid _dataGrid;
-        private bool _aplicarFiltroFechas;  
+        private bool _aplicarFiltroFechas;
+
+        private double _uiScale = 1.0;
+        private bool _isVisorColapsado;
+        private ICommand? _zoomInCommand;
+        private ICommand? _zoomOutCommand;
+        private ICommand? _zoomResetCommand;
+        private ICommand? _toggleVisorCommand;
 
         private Expediente? _selectedExpediente;
 
@@ -209,6 +216,41 @@ namespace GestorRemesasWpf.ViewModels
         public ICommand ActualizarCommand { get; }
         public ICommand CrearRemesaCommand { get; }
 
+        public const double UiScaleMin = 0.6;
+        public const double UiScaleMax = 2.0;
+        public const double UiScaleStep = 0.1;
+
+        public double UiScale
+        {
+            get => _uiScale;
+            set
+            {
+                var clamped = Math.Round(Math.Clamp(value, UiScaleMin, UiScaleMax), 2);
+                if (Math.Abs(_uiScale - clamped) < 0.001) return;
+                _uiScale = clamped;
+                OnPropertyChanged(nameof(UiScale));
+                OnPropertyChanged(nameof(UiScalePercent));
+            }
+        }
+
+        public string UiScalePercent => $"{(int)Math.Round(_uiScale * 100)}%";
+
+        public bool IsVisorColapsado
+        {
+            get => _isVisorColapsado;
+            set
+            {
+                if (_isVisorColapsado == value) return;
+                _isVisorColapsado = value;
+                OnPropertyChanged(nameof(IsVisorColapsado));
+            }
+        }
+
+        public ICommand ZoomInCommand => _zoomInCommand ??= new RelayCommand(() => UiScale += UiScaleStep);
+        public ICommand ZoomOutCommand => _zoomOutCommand ??= new RelayCommand(() => UiScale -= UiScaleStep);
+        public ICommand ZoomResetCommand => _zoomResetCommand ??= new RelayCommand(() => UiScale = 1.0);
+        public ICommand ToggleVisorCommand => _toggleVisorCommand ??= new RelayCommand(() => IsVisorColapsado = !IsVisorColapsado);
+
         private async void Actualizar()
         {
             IsBusy = true;
@@ -236,6 +278,7 @@ namespace GestorRemesasWpf.ViewModels
 
             FechaInicio = DateTime.Now;
             FechaFin = DateTime.Now;
+            AplicarFiltroFechas = true;
 
             _dataGrid = dataGrid;
 

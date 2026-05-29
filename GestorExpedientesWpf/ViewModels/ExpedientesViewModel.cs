@@ -36,10 +36,17 @@ namespace GestorExpedientesWpf.ViewModels
         private ICommand _eliminarSeleccionCommand;
         private ICommand _showEditMetadataCommand;
         private ICommand _cancelEditMetadataCommand;
-        private ICommand _setMetadataCommand;    
+        private ICommand _setMetadataCommand;
+        private ICommand? _zoomInCommand;
+        private ICommand? _zoomOutCommand;
+        private ICommand? _zoomResetCommand;
+        private ICommand? _toggleVisorCommand;
 
         private bool _ignorarDocumentosConRemesa;
         private bool _mostrarSoloDocumentosHuerfanos;
+
+        private double _uiScale = 1.0;
+        private bool _isVisorColapsado;
 
         private ICollectionView _expedientesView;
 
@@ -209,6 +216,36 @@ namespace GestorExpedientesWpf.ViewModels
             }
         }
 
+        public const double UiScaleMin = 0.6;
+        public const double UiScaleMax = 2.0;
+        public const double UiScaleStep = 0.1;
+
+        public double UiScale
+        {
+            get => _uiScale;
+            set
+            {
+                var clamped = Math.Round(Math.Clamp(value, UiScaleMin, UiScaleMax), 2);
+                if (Math.Abs(_uiScale - clamped) < 0.001) return;
+                _uiScale = clamped;
+                OnPropertyChanged(nameof(UiScale));
+                OnPropertyChanged(nameof(UiScalePercent));
+            }
+        }
+
+        public string UiScalePercent => $"{(int)Math.Round(_uiScale * 100)}%";
+
+        public bool IsVisorColapsado
+        {
+            get => _isVisorColapsado;
+            set
+            {
+                if (_isVisorColapsado == value) return;
+                _isVisorColapsado = value;
+                OnPropertyChanged(nameof(IsVisorColapsado));
+            }
+        }
+
         #endregion
 
         #region Comandos
@@ -222,6 +259,11 @@ namespace GestorExpedientesWpf.ViewModels
         public ICommand CancelEditMetadataCommand => _cancelEditMetadataCommand ??= new RelayCommand(param => EditMetadataMode = false, null);
         public ICommand SetMetadataCommand => _setMetadataCommand ??= new RelayCommand(param => SetMetadata(), null);
 
+        public ICommand ZoomInCommand => _zoomInCommand ??= new RelayCommand(_ => UiScale += UiScaleStep);
+        public ICommand ZoomOutCommand => _zoomOutCommand ??= new RelayCommand(_ => UiScale -= UiScaleStep);
+        public ICommand ZoomResetCommand => _zoomResetCommand ??= new RelayCommand(_ => UiScale = 1.0);
+        public ICommand ToggleVisorCommand => _toggleVisorCommand ??= new RelayCommand(_ => IsVisorColapsado = !IsVisorColapsado);
+
         #endregion
 
         #region Constructor
@@ -233,6 +275,7 @@ namespace GestorExpedientesWpf.ViewModels
             FechaInicio = DateTime.Now;
             FechaFin = DateTime.Now;
 
+            AplicarFiltroFechas = true;
             IgnorarDocumentosConRemesa = true;
             MostrarSoloDocumentosHuerfanos = false;
             AsegurarTriplete = true;

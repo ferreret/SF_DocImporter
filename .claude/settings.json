@@ -6,8 +6,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.cs$'; then cd 'F:/Tecnomedia/SagradaFamilia/Proyecto' && dotnet build SF_Solution.sln --no-restore -v q 2>&1 | tail -20; fi",
-            "timeout": 30000
+            "command": "dotnet build SF_Solution.sln --no-restore -v q",
+            "if": "Edit(**/*.cs)",
+            "timeout": 60,
+            "statusMessage": "Compilando solucion tras cambios en .cs"
+          },
+          {
+            "type": "command",
+            "command": "dotnet build SF_Solution.sln --no-restore -v q",
+            "if": "Write(**/*.cs)",
+            "timeout": 60,
+            "statusMessage": "Compilando solucion tras crear .cs"
           }
         ]
       }
@@ -18,7 +27,23 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '(vsconfig\\.json|mutuas\\.txt)$'; then echo 'BLOCK: Archivo sensible - vsconfig.json o mutuas.txt. Confirma con el usuario antes de editar.'; exit 1; fi"
+            "command": "echo BLOCK: Archivo sensible vsconfig.json. Confirma con el usuario antes de editar. && exit 1",
+            "if": "Edit(**/vsconfig.json)"
+          },
+          {
+            "type": "command",
+            "command": "echo BLOCK: Archivo sensible vsconfig.json. Confirma con el usuario antes de editar. && exit 1",
+            "if": "Write(**/vsconfig.json)"
+          },
+          {
+            "type": "command",
+            "command": "echo BLOCK: Archivo sensible mutuas.txt. Confirma con el usuario antes de editar. && exit 1",
+            "if": "Edit(**/mutuas.txt)"
+          },
+          {
+            "type": "command",
+            "command": "echo BLOCK: Archivo sensible mutuas.txt. Confirma con el usuario antes de editar. && exit 1",
+            "if": "Write(**/mutuas.txt)"
           }
         ]
       }

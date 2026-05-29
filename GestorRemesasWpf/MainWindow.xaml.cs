@@ -1,5 +1,6 @@
 ﻿using GestorRemesasWpf.ViewModels;
 using LibUtil;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -21,14 +22,95 @@ namespace GestorRemesasWpf
     public partial class MainWindow : Window
     {
         private List<string> mutuas;
+        private IniFile? _uiIni;
+        private GridLength _visorDefaultWidth;
+        private double _visorDefaultMinWidth;
 
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new ExpedienteViewModel(ExpedientesDataGrid);
+            var vm = new ExpedienteViewModel(ExpedientesDataGrid);
+            DataContext = vm;
+
+            _visorDefaultWidth = VisorColumn.Width;
+            _visorDefaultMinWidth = VisorColumn.MinWidth;
+
             LoadMutuas();
+            LoadUiSettings(vm);
+
+            vm.PropertyChanged += Vm_PropertyChanged;
+            ApplyVisorColapsado(vm.IsVisorColapsado);
+
+            Closing += MainWindow_Closing;
+
             var v = Assembly.GetExecutingAssembly().GetName().Version;
             Title = $"{Title} v{v?.Major}.{v?.Minor}.{v?.Build}";
+        }
+
+        private void Vm_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ExpedienteViewModel.IsVisorColapsado)
+                && DataContext is ExpedienteViewModel vm)
+            {
+                ApplyVisorColapsado(vm.IsVisorColapsado);
+            }
+        }
+
+        private void ApplyVisorColapsado(bool colapsado)
+        {
+            if (colapsado)
+            {
+                VisorColumn.MinWidth = 0;
+                VisorColumn.Width = new GridLength(0);
+            }
+            else
+            {
+                VisorColumn.MinWidth = _visorDefaultMinWidth;
+                VisorColumn.Width = _visorDefaultWidth;
+            }
+        }
+
+        private void LoadUiSettings(ExpedienteViewModel vm)
+        {
+            try
+            {
+                var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GestorRemesasWpf.ini");
+                if (!File.Exists(path)) return;
+                _uiIni = new IniFile(path);
+                vm.UiScale = _uiIni.TryReadDouble("UI", "Zoom", 1.0);
+                vm.IsVisorColapsado = _uiIni.TryReadBool("UI", "VisorColapsado", false);
+            }
+            catch
+            {
+                // Si falla, seguimos con los valores por defecto del VM
+            }
+        }
+
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            try
+            {
+                if (_uiIni != null && DataContext is ExpedienteViewModel vm)
+                {
+                    _uiIni.WriteDouble("UI", "Zoom", vm.UiScale);
+                    _uiIni.WriteBool("UI", "VisorColapsado", vm.IsVisorColapsado);
+                    _uiIni.Save();
+                }
+            }
+            catch
+            {
+                // No bloquear el cierre por errores al guardar prefs UI
+            }
+        }
+
+        protected override void OnPreviewMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnPreviewMouseWheel(e);
+            if (Keyboard.Modifiers == ModifierKeys.Control && DataContext is ExpedienteViewModel vm)
+            {
+                vm.UiScale += e.Delta > 0 ? ExpedienteViewModel.UiScaleStep : -ExpedienteViewModel.UiScaleStep;
+                e.Handled = true;
+            }
         }
 
 

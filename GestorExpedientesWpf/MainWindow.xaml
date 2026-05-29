@@ -17,6 +17,16 @@
         <viewModel:ExpedientesViewModel/>
     </Window.DataContext>
 
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Control" Key="OemPlus" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Modifiers="Control" Key="Add" Command="{Binding ZoomInCommand}"/>
+        <KeyBinding Modifiers="Control" Key="OemMinus" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Modifiers="Control" Key="Subtract" Command="{Binding ZoomOutCommand}"/>
+        <KeyBinding Modifiers="Control" Key="D0" Command="{Binding ZoomResetCommand}"/>
+        <KeyBinding Modifiers="Control" Key="NumPad0" Command="{Binding ZoomResetCommand}"/>
+        <KeyBinding Key="F11" Command="{Binding ToggleVisorCommand}"/>
+    </Window.InputBindings>
+
     <Window.Resources>
         <converters:NullToDefaultUrlConverter x:Key="NullToDefaultUrlConverter"/>
 
@@ -216,10 +226,18 @@
     </Window.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="ContentRoot" Grid.Row="0">
+            <Grid.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding UiScale, FallbackValue=1}" ScaleY="{Binding UiScale, FallbackValue=1}"/>
+            </Grid.LayoutTransform>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="11*" MinWidth="700"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="9*" MinWidth="500"/>
+            <ColumnDefinition Width="22"/>
+            <ColumnDefinition x:Name="VisorColumn" Width="9*" MinWidth="500"/>
         </Grid.ColumnDefinitions>
 
         <!-- COLUMNA IZQUIERDA -->
@@ -366,8 +384,17 @@
         </Grid>
 
         <!-- Splitter -->
-        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Background="{StaticResource SplitterBrush}"
+        <GridSplitter x:Name="VisorSplitter" Grid.Column="1" Width="6" HorizontalAlignment="Center" Background="{StaticResource SplitterBrush}"
                       ToolTip="Ajustar tamaño" Cursor="SizeWE">
+            <GridSplitter.Style>
+                <Style TargetType="GridSplitter">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsVisorColapsado}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GridSplitter.Style>
             <GridSplitter.Template>
                 <ControlTemplate TargetType="GridSplitter">
                     <Border Background="{TemplateBinding Background}" CornerRadius="3" Margin="0,16"/>
@@ -375,12 +402,84 @@
             </GridSplitter.Template>
         </GridSplitter>
 
+        <!-- Botón colapsar/expandir visor (overlay sobre el splitter) -->
+        <ToggleButton Grid.Column="1" IsChecked="{Binding IsVisorColapsado, Mode=TwoWay}"
+                      Width="22" Height="56" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      Cursor="Hand" Panel.ZIndex="10"
+                      ToolTip="Colapsar/expandir visor (F11)" Focusable="False">
+            <ToggleButton.Style>
+                <Style TargetType="ToggleButton">
+                    <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="11">
+                                    <TextBlock x:Name="Icon" Text="&#x276E;" Foreground="{TemplateBinding Foreground}"
+                                               FontSize="13" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="Icon" Property="Text" Value="&#x276F;"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ToggleButton.Style>
+        </ToggleButton>
+
         <!-- COLUMNA DERECHA - VISOR PDF -->
         <TabControl Grid.Column="2" Margin="8,16,16,16">
             <TabItem Header="Visor de Documento">
                 <wv2:WebView2 Source="{Binding SelectedExpedienteUrl, Converter={StaticResource NullToDefaultUrlConverter}}"/>
             </TabItem>
         </TabControl>
+        </Grid>
+
+        <!-- Status bar inferior (fuera del LayoutTransform) -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="12,2">
+            <Border.Resources>
+                <Style x:Key="ZoomButtonStyle" TargetType="Button">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bd" Property="Background" Value="{StaticResource RowHoverBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Border.Resources>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="&#x2212;" Width="28" Height="24" Command="{Binding ZoomOutCommand}"
+                        Style="{StaticResource ZoomButtonStyle}" FontSize="14" FontWeight="Bold"
+                        ToolTip="Reducir (Ctrl + −)"/>
+                <Button Content="{Binding UiScalePercent}" MinWidth="52" Height="24" Command="{Binding ZoomResetCommand}"
+                        Style="{StaticResource ZoomButtonStyle}" FontSize="12"
+                        ToolTip="Restablecer 100% (Ctrl + 0)"/>
+                <Button Content="&#x002B;" Width="28" Height="24" Command="{Binding ZoomInCommand}"
+                        Style="{StaticResource ZoomButtonStyle}" FontSize="14" FontWeight="Bold"
+                        ToolTip="Ampliar (Ctrl + +)"/>
+            </StackPanel>
+        </Border>
     </Grid>
 
 </Window>
